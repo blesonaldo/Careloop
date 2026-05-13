@@ -1,0 +1,21 @@
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text
+from sqlalchemy.sql import func
+from .base import Base
+
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    full_name = Column(String, nullable=False)
+    business_name = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
+    hashed_password = Column(String, nullable=True)
+    is_email_verified = Column(Boolean, default=False)
+    email_verification_token = Column(String, nullable=True)
+    email_verification_expires_at = Column(DateTime(timezone=True), nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    last_login_at = Column(DateTime(timezone=True), nullable=True)
+    last_login_at = Column(DateTime, nullable=True)

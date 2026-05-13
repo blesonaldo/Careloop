@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careloop - Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        /* LOGO PLACEHOLDER - replace src with final asset path */
+        #logo-img {
+            height: 38px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 12px;
+            color: #111827;
+            line-height: 1.3;
+        }
+
+        .subtext {
+            font-size: 14px;
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #3c4fe0;
+            box-shadow: 0 0 0 3px rgba(60, 79, 224, 0.1);
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        /* Phone Number Field Styles */
+        .phone-field-container {
+            position: relative;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .phone-field-container:focus-within {
+            border-color: #3c4fe0;
+            box-shadow: 0 0 0 3px rgba(60, 79, 224, 0.1);
+        }
+
+        .country-selector {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-right: 1px solid #d1d5db;
+            cursor: pointer;
+            user-select: none;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .country-selector:hover {
+            background: #f9fafb;
+        }
+
+        .country-flag {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+        }
+
+        .country-dial-code {
+            font-size: 14px;
+            color: #374151;
+            margin-right: 8px;
+        }
+
+        .chevron {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.2s ease;
+            margin-left: auto;
+        }
+
+        .chevron.rotated {
+            transform: rotate(180deg);
+        }
+
+        .phone-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            font-size: 14px;
+            background: transparent;
+            outline: none;
+        }
+
+        .phone-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .country-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .country-dropdown.active {
+            display: block;
+        }
+
+        .search-bar {
+            position: sticky;
+            top: 0;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .country-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .country-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s ease;
+        }
+
+        .country-item:hover {
+            background: #f9fafb;
+        }
+
+        .country-item:last-child {
+            border-bottom: none;
+        }
+
+        .country-item-flag {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        .country-item-name {
+            flex: 1;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .country-item-dial {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .phone-field-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Button Styles */
+        .submit-button {
+            width: 100%;
+            border: none;
+            padding: 0;
+            background: transparent;
+            cursor: pointer;
+            margin-top: 24px;
+            margin-bottom: 24px;
+        }
+
+        .submit-button img {
+            width: 100%;
+            height: auto;
+            border-radius: 50px;
+            display: none;
+        }
+
+        /* 
+        BUTTON STATES:
+        - btn-inactive: Shown on page load when all fields are empty
+        - btn-active: Shown when any field has content  
+        - btn-loading: Shown while form is submitting
+        Only one image is visible at a time via display:block/none
+        */
+
+        .login-link {
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .login-link a {
+            color: #3c4fe0;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Success Popup Styles */
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-overlay.active {
+            display: flex;
+        }
+
+        .success-modal {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 36px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            display: block;
+            margin: 0 auto 24px;
+        }
+
+        .success-text-1 {
+            font-size: 15px;
+            color: #9ca3af;
+            text-align: center;
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .success-text-2 {
+            font-size: 15px;
+            color: #3C4FE0;
+            font-weight: 600;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo -->
+        <div class="logo-container">
+            <!-- LOGO PLACEHOLDER - replace src with final asset path -->
+            <img id="logo-img" src="assets/primary_logo.jpg" alt="Careloop">
+        </div>
+
+        <!-- Heading -->
+        <h1>Never lose track of your customers again</h1>
+        <p class="subtext">Careloop helps you remember, follow up, and stay consistentâwithout stress.</p>
+
+        <!-- Form -->
+        <form id="signup-form">
+            <!-- Full Name -->
+            <div class="form-group">
+                <label for="full-name">Full Name</label>
+                <input type="text" id="full-name" name="fullName" placeholder="Enter your full name" required>
+            </div>
+
+            <!-- Business Name -->
+            <div class="form-group">
+                <label for="business-name">Business Name</label>
+                <input type="text" id="business-name" name="businessName" placeholder="Enter your business name" required>
+            </div>
+
+            <!-- Email Address -->
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <div class="phone-field-container">
+                    <div class="phone-field-wrapper">
+                        <button type="button" class="country-selector" id="country-selector">
+                            <img class="country-flag" id="selected-flag" src="https://flagcdn.com/w40/us.png" alt="US">
+                            <span class="country-dial-code" id="selected-dial">+1</span>
+                            <svg class="chevron" id="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <input type="tel" class="phone-input" id="phone" name="phone" placeholder="Enter phone number" required>
+                    </div>
+                    
+                    <!-- Country Dropdown -->
+                    <div class="country-dropdown" id="country-dropdown">
+                        <div class="search-bar">
+                            <input type="text" class="search-input" id="country-search" placeholder="Search country...">
+                        </div>
+                        <div class="country-list" id="country-list">
+                            <!-- Countries will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-button" id="submit-button">
+                <img id="btn-inactive" src="assets/btn_inactive.jpg" alt="Submit" style="display: block;">
+                <img id="btn-active" src="assets/btn_active.jpg" alt="Submit">
+                <img id="btn-loading" src="assets/btn_loading.jpg" alt="Loading">
+            </button>
+
+            <!-- Login Link -->
+            <div class="login-link">
+                Do you have an account? <a href="/login">Login</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Success Popup Overlay -->
+    <div class="success-overlay" id="success-overlay">
+        <div class="success-modal">
+            <!-- CIRCLE ICON PLACEHOLDER - replace src with final asset path if renamed -->
+            <img class="success-icon" src="assets/Circle__1_.jpg" alt="Success">
+            
+            <p class="success-text-1">We have sent reset instructions to</p>
+            <p class="success-text-2" id="success-email">user@example.com</p>
+        </div>
+    </div>
+
+    <script>
+        // Country data
+        const countries = [
+            { name: 'United States', code: 'us', dial: '+1' },
+            { name: 'United Kingdom', code: 'gb', dial: '+44' },
+            { name: 'Canada', code: 'ca', dial: '+1' },
+            { name: 'Australia', code: 'au', dial: '+61' },
+            { name: 'India', code: 'in', dial: '+91' },
+            { name: 'Germany', code: 'de', dial: '+49' },
+            { name: 'France', code: 'fr', dial: '+33' },
+            { name: 'Italy', code: 'it', dial: '+39' },
+            { name: 'Spain', code: 'es', dial: '+34' },
+            { name: 'Brazil', code: 'br', dial: '+55' },
+            { name: 'Mexico', code: 'mx', dial: '+52' },
+            { name: 'Japan', code: 'jp', dial: '+81' },
+            { name: 'China', code: 'cn', dial: '+86' },
+            { name: 'South Africa', code: 'za', dial: '+27' },
+            { name: 'Nigeria', code: 'ng', dial: '+234' },
+            { name: 'Ghana', code: 'gh', dial: '+233' },
+            { name: 'Kenya', code: 'ke', dial: '+254' },
+            { name: 'Netherlands', code: 'nl', dial: '+31' },
+            { name: 'Sweden', code: 'se', dial: '+46' },
+            { name: 'Singapore', code: 'sg', dial: '+65' },
+            { name: 'UAE', code: 'ae', dial: '+971' },
+            { name: 'Portugal', code: 'pt', dial: '+351' },
+            { name: 'Romania', code: 'ro', dial: '+40' },
+            { name: 'Poland', code: 'pl', dial: '+48' },
+            { name: 'Pakistan', code: 'pk', dial: '+92' }
+        ];
+
+        let selectedCountry = countries[0]; // Default to US
+        let dropdownOpen = false;
+
+        // Initialize country list
+        function initializeCountryList() {
+            const countryList = document.getElementById('country-list');
+            countryList.innerHTML = '';
+            
+            countries.forEach(country => {
+                const item = document.createElement('div');
+                item.className = 'country-item';
+                item.innerHTML = `
+                    <img class="country-item-flag" src="https://flagcdn.com/w40/${country.code}.png" alt="${country.name}">
+                    <span class="country-item-name">${country.name}</span>
+                    <span class="country-item-dial">${country.dial}</span>
+                `;
+                
+                item.addEventListener('click', () => selectCountry(country));
+                countryList.appendChild(item);
+            });
+        }
+
+        // Select country
+        function selectCountry(country) {
+            selectedCountry = country;
+            document.getElementById('selected-flag').src = `https://flagcdn.com/w40/${country.code}.png`;
+            document.getElementById('selected-dial').textContent = country.dial;
+            closeDropdown();
+        }
+
+        // Toggle dropdown
+        function toggleDropdown() {
+            if (dropdownOpen) {
+                closeDropdown();
+            } else {
+                openDropdown();
+            }
+        }
+
+        // Open dropdown
+        function openDropdown() {
+            dropdownOpen = true;
+            document.getElementById('country-dropdown').classList.add('active');
+            document.getElementById('chevron').classList.add('rotated');
+            document.getElementById('country-search').focus();
+        }
+
+        // Close dropdown
+        function closeDropdown() {
+            dropdownOpen = false;
+            document.getElementById('country-dropdown').classList.remove('active');
+            document.getElementById('chevron').classList.remove('rotated');
+        }
+
+        // Filter countries
+        function filterCountries(searchTerm) {
+            const countryList = document.getElementById('country-list');
+            countryList.innerHTML = '';
+            
+            const filtered = countries.filter(country => 
+                country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                country.dial.includes(searchTerm)
+            );
+            
+            filtered.forEach(country => {
+                const item = document.createElement('div');
+                item.className = 'country-item';
+                item.innerHTML = `
+                    <img class="country-item-flag" src="https://flagcdn.com/w40/${country.code}.png" alt="${country.name}">
+                    <span class="country-item-name">${country.name}</span>
+                    <span class="country-item-dial">${country.dial}</span>
+                `;
+                
+                item.addEventListener('click', () => selectCountry(country));
+                countryList.appendChild(item);
+            });
+        }
+
+        // Button state management
+        function updateButtonState() {
+            const fullName = document.getElementById('full-name').value.trim();
+            const businessName = document.getElementById('business-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            const btnInactive = document.getElementById('btn-inactive');
+            const btnActive = document.getElementById('btn-active');
+            
+            // Check if any field has content
+            const hasContent = fullName || businessName || email || phone;
+            
+            if (hasContent) {
+                btnInactive.style.display = 'none';
+                btnActive.style.display = 'block';
+            } else {
+                btnInactive.style.display = 'block';
+                btnActive.style.display = 'none';
+            }
+        }
+
+        // Form validation
+        function validateForm() {
+            const fullName = document.getElementById('full-name').value.trim();
+            const businessName = document.getElementById('business-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            if (!fullName) {
+                alert('Full name is required');
+                return false;
+            }
+            
+            if (!businessName) {
+                alert('Business name is required');
+                return false;
+            }
+            
+            if (!email) {
+                alert('Email address is required');
+                return false;
+            }
+            
+            // Basic email validation
+            if (!email.includes('@') || !email.includes('.')) {
+                alert('Please enter a valid email address');
+                return false;
+            }
+            
+            if (!phone) {
+                alert('Phone number is required');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Form submission
+        async function submitForm(e) {
+            console.log('Form submission triggered');
+            e.preventDefault();
+            
+            console.log('Validating form...');
+            if (!validateForm()) {
+                console.log('Form validation failed');
+                return;
+            }
+            
+            console.log('Form validation passed');
+            
+            // Get form data
+            const fullName = document.getElementById('full-name').value.trim();
+            const businessName = document.getElementById('business-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const dialCode = document.getElementById('selected-dial').textContent;
+            
+            // Show loading state
+            document.getElementById('btn-inactive').style.display = 'none';
+            document.getElementById('btn-active').style.display = 'none';
+            document.getElementById('btn-loading').style.display = 'block';
+            
+            try {
+                console.log('Making API call to backend...');
+                console.log('Form data:', { fullName, businessName, email, phone: dialCode + phone });
+                
+                // Send data to backend API
+                const response = await fetch('http://localhost:8001/api/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        business_name: businessName,
+                        email,
+                        phone: dialCode + phone
+                    })
+                });
+                
+                console.log('API response status:', response.status);
+                console.log('API response headers:', response.headers);
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                let data;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.log('Non-JSON response:', text);
+                    throw new Error('Server returned non-JSON response. Please check the backend logs.');
+                }
+                
+                console.log('API response data:', data);
+                
+                if (response.ok) {
+                    // Save user data to localStorage
+                    localStorage.setItem('cl_user', JSON.stringify({
+                        name: fullName,
+                        business: businessName,
+                        avatar: null
+                    }));
+                    
+                    // Redirect to signup success page
+                    window.location.href = '/signup-success';
+                    
+                    console.log('Signup successful:', data);
+                } else {
+                    // Handle backend errors
+                    throw new Error(data.message || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert(error.message || 'Registration failed. Please try again.');
+                
+                // Reset button state
+                document.getElementById('btn-inactive').style.display = 'none';
+                document.getElementById('btn-active').style.display = 'block';
+                document.getElementById('btn-loading').style.display = 'none';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize country list
+            initializeCountryList();
+            
+            // Country selector
+            document.getElementById('country-selector').addEventListener('click', toggleDropdown);
+            
+            // Search functionality
+            document.getElementById('country-search').addEventListener('input', function(e) {
+                filterCountries(e.target.value);
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.phone-field-container')) {
+                    closeDropdown();
+                }
+            });
+            
+            // Close dropdown on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && dropdownOpen) {
+                    closeDropdown();
+                }
+            });
+            
+            // Input listeners for button state
+            const inputs = ['full-name', 'business-name', 'email', 'phone'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', updateButtonState);
+            });
+            
+            // Form submission
+            document.getElementById('signup-form').addEventListener('submit', submitForm);
+        });
+    </script>
+</body>
+</html>

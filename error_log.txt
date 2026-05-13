@@ -1,0 +1,48 @@
+INFO:app.services.email_service:SendGrid API key loaded successfully
+C:\Users\USER\Desktop\Careloop\main.py:45: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+Available SENDGRID environment variables:
+  SENDGRID_API_KEY: *****************************************************************ojAY
+  SENDGRID_FROM_EMAIL: *************************.com
+INFO:     Started server process [22532]
+INFO:     Waiting for application startup.
+2026-05-12 19:37:48,215 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-05-12 19:37:48,216 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("customers")
+2026-05-12 19:37:48,217 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:PRAGMA main.table_info("customers")
+INFO:sqlalchemy.engine.Engine:[raw sql] ()
+2026-05-12 19:37:48,221 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("users")
+INFO:sqlalchemy.engine.Engine:PRAGMA main.table_info("users")
+2026-05-12 19:37:48,221 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO:sqlalchemy.engine.Engine:[raw sql] ()
+2026-05-12 19:37:48,224 INFO sqlalchemy.engine.Engine COMMIT
+INFO:sqlalchemy.engine.Engine:COMMIT
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-05-12 19:38:26,062 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-05-12 19:38:26,074 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.full_name, users.business_name, users.phone, users.hashed_password, users.is_email_verified, users.email_verification_token, users.email_verification_expires_at, users.is_active, users.created_at, users.updated_at, users.last_login_at 
+FROM users 
+WHERE users.id = ?
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.full_name, users.business_name, users.phone, users.hashed_password, users.is_email_verified, users.email_verification_token, users.email_verification_expires_at, users.is_active, users.created_at, users.updated_at, users.last_login_at 
+FROM users 
+WHERE users.id = ?
+2026-05-12 19:38:26,074 INFO sqlalchemy.engine.Engine [generated in 0.00053s] (16,)
+INFO:sqlalchemy.engine.Engine:[generated in 0.00053s] (16,)
+2026-05-12 19:38:26,084 INFO sqlalchemy.engine.Engine SELECT customers.id, customers.user_id, customers.name, customers.phone_number, customers.email, customers.date_of_birth, customers.customer_type, customers.has_purchased, customers.created_at, customers.updated_at 
+FROM customers 
+WHERE customers.user_id = ? AND (customers.email = ? OR customers.phone_number = ?)
+INFO:sqlalchemy.engine.Engine:SELECT customers.id, customers.user_id, customers.name, customers.phone_number, customers.email, customers.date_of_birth, customers.customer_type, customers.has_purchased, customers.created_at, customers.updated_at 
+FROM customers 
+WHERE customers.user_id = ? AND (customers.email = ? OR customers.phone_number = ?)
+2026-05-12 19:38:26,085 INFO sqlalchemy.engine.Engine [generated in 0.00059s] (16, 'oluwaseunolaniran01@gmail.com', '+2348165818094')
+INFO:sqlalchemy.engine.Engine:[generated in 0.00059s] (16, 'oluwaseunolaniran01@gmail.com', '+2348165818094')
+2026-05-12 19:38:26,086 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+INFO:     127.0.0.1:55373 - "POST /api/customers/ HTTP/1.1" 500 Internal Server Error
