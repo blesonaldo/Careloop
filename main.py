@@ -8,9 +8,10 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 from app.database import get_db, init_db
-from app.models import Customer, User
-from app.routes import auth, user, customer, message
+from app.models import Customer, User, notification
+from app.routes import auth, user, customer, message, notification
 from fastapi import APIRouter
+from app.routes import notification
 from app.schemas.user import UserResponse, ResetPasswordRequest, SetInitialPasswordRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -18,7 +19,7 @@ from app.controllers.auth_controller import AuthController
 import os
 
 # Ensure all models are imported for database initialization
-from app.models import *
+# from app.models import *
 
 app = FastAPI(
     title="Careloop API",
@@ -199,7 +200,7 @@ async def set_initial_password_submit(request: SetInitialPasswordRequest, db: As
 app.include_router(user.router, prefix="/api")
 app.include_router(customer.router)
 app.include_router(message.router)
-
+app.include_router(notification.router)
 
 @app.get("/careloop-signup.html", response_class=HTMLResponse)
 async def serve_signup_page():
