@@ -9,7 +9,7 @@ from pydantic import ValidationError
 load_dotenv()
 from app.database import get_db
 from app.models import Customer, User
-from app.routes import auth, user, customer, message, notification
+from app.routes import auth, user, customer, message, notification, sale
 from fastapi import APIRouter
 from app.schemas.user import ResetPasswordRequest, SetInitialPasswordRequest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -176,6 +176,7 @@ app.include_router(user.router, prefix="/api")
 app.include_router(customer.router)
 app.include_router(message.router)
 app.include_router(notification.router)
+app.include_router(sale.router)
 
 @app.get("/careloop-signup.html", response_class=HTMLResponse)
 async def serve_signup_page():
@@ -279,4 +280,6 @@ async def get_users():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
+
+
 

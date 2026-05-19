@@ -1246,7 +1246,19 @@ body.dark-mode.eye-care {
     <select class="field-input" id="sale-cust-select" style="margin-bottom:16px;cursor:pointer;">
       <option value="">— Select Customer —</option>
     </select>
-    <label class="field-label">Amount ($)</label>
+    <label class="field-label">Currency</label>
+    <select class="field-input" id="sale-currency" style="margin-bottom:16px;cursor:pointer;" onchange="saveCurrencyPreference(this.value)">
+      <option value="USD">USD - US Dollar</option>
+      <option value="EUR">EUR - Euro</option>
+      <option value="GBP">GBP - British Pound</option>
+      <option value="NGN">NGN - Nigerian Naira</option>
+      <option value="GHS">GHS - Ghanaian Cedi</option>
+      <option value="KES">KES - Kenyan Shilling</option>
+      <option value="ZAR">ZAR - South African Rand</option>
+      <option value="CAD">CAD - Canadian Dollar</option>
+      <option value="AUD">AUD - Australian Dollar</option>
+    </select>
+    <label class="field-label">Amount</label>
     <input type="number" class="field-input" id="sale-amount" placeholder="0.00" min="0" step="0.01">
     <label class="field-label">Product / Service (optional)</label>
     <input type="text" class="field-input" id="sale-product" placeholder="Enter product name">
@@ -1265,7 +1277,8 @@ body.dark-mode.eye-care {
 let customers = [];
 let followups = [];
 let notifications = [];
-let sales = JSON.parse(localStorage.getItem('cl_sales')||'[]');
+let sales = [];
+let preferredCurrency = localStorage.getItem('cl_currency') || 'USD';
 let currentUser = {name:'User',business:'Business',avatar:null};
 let activeTab = 'all';
 let snoozeCustomerId = null;
@@ -1353,6 +1366,8 @@ document.getElementById('eyeCareToggle').addEventListener('click', () => {
     localStorage.setItem('eyeCare', document.body.classList.contains('eye-care'));
 });
 updateUserUI();
+  await loadPreferences();
+  await loadSales();
   await loadCustomers();
   buildFollowups();
   buildNotifications();
@@ -1443,6 +1458,48 @@ function changeAvatar(){
     r.readAsDataURL(f);
   };
   inp.click();
+}
+
+
+// --- LOAD SALES ---
+async function loadSales(){
+  const token=localStorage.getItem('authToken'); if(!token) return;
+  try{
+    const r=await fetch('/api/sales',{headers:{'Authorization':'Bearer '+token}});
+    if(r.ok){
+      const d=await r.json();
+      sales=d.items.map(s=>({...s,customerId:s.customer_id}));
+    }
+  }catch(e){sales=[];}
+}
+
+// --- LOAD PREFERENCES ---
+async function loadPreferences(){
+  const token=localStorage.getItem('authToken'); if(!token) return;
+  try{
+    const r=await fetch('/api/user/profile',{headers:{'Authorization':'Bearer '+token}});
+    if(r.ok){
+      const u=await r.json();
+      if(u.preferred_currency){
+        preferredCurrency=u.preferred_currency;
+        localStorage.setItem('cl_currency',preferredCurrency);
+      }
+    }
+  }catch(e){}
+}
+
+// --- SAVE CURRENCY PREFERENCE ---
+async function saveCurrencyPreference(currency){
+  preferredCurrency=currency;
+  localStorage.setItem('cl_currency',currency);
+  const token=localStorage.getItem('authToken');
+  try{
+    await fetch('/api/sales/preferences',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({preferred_currency:currency})
+    });
+  }catch(e){}
 }
 
 // ─── LOAD CUSTOMERS ───
@@ -1684,17 +1741,30 @@ function openRecordSaleModal(){
   document.getElementById('sale-product').value='';
   document.getElementById('sale-modal').classList.add('open');
 }
-function submitSale(){
+async function submitSale(){
   const custId=document.getElementById('sale-cust-select').value;
   const amount=parseFloat(document.getElementById('sale-amount').value);
   const product=document.getElementById('sale-product').value.trim();
+  const currency=document.getElementById('sale-currency').value||preferredCurrency;
   if(!custId||isNaN(amount)||amount<=0){alert('Please select a customer and enter a valid amount.');return;}
-  const c=customers.find(x=>String(x.id)===String(custId));
-  sales.push({customerId:custId,amount,product,date:new Date().toISOString()});
-  localStorage.setItem('cl_sales',JSON.stringify(sales));
-  if(c) addNotification({type:'cart',title:'Sale Recorded',names:c.name});
-  closeModal('sale-modal');
-  alert('Sale recorded!');
+  const token=localStorage.getItem('authToken');
+  try{
+    const r=await fetch('/api/sales',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({customer_id:parseInt(custId),amount,currency,product:product||null})
+    });
+    if(r.ok){
+      const saved=await r.json();
+      sales.unshift({...saved,customerId:saved.customer_id});
+      const c=customers.find(x=>String(x.id)===String(custId));
+      if(c) addNotification({type:'cart',title:'Sale Recorded',names:c.name});
+      closeModal('sale-modal');
+      renderSalesPage();
+    } else {
+      alert('Failed to record sale.');
+    }
+  }catch(e){alert('Failed to record sale: '+e.message);}
 }
 
 // ─── CUSTOMERS PAGE ───
@@ -1978,7 +2048,9 @@ function updateRevenueStats(){
   }).reduce((s,x)=>s+(x.amount||0), 0);
   const uniqueCust = new Set(sales.map(s=>s.customerId)).size;
   const perCust = uniqueCust ? total/uniqueCust : 0;
-  const fmt = n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const symbols={'USD':'$','EUR':'\u20ac','GBP':'\u00a3','NGN':'\u20a6','GHS':'\u20b5','KES':'KSh','ZAR':'R','CAD':'CA$','AUD':'A$'};
+  const sym=symbols[preferredCurrency]||preferredCurrency+' ';
+  const fmt = n=>sym+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
   ['rev-total','stat-total-revenue'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmt(total);});
   ['rev-month','stat-monthly-revenue'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmt(monthSales);});
   ['rev-per-cust','stat-revenue-per-customer'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmt(perCust);});

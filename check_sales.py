@@ -1,0 +1,5 @@
+f = open('Frontend/careloop-dashboard.html', 'r', encoding='utf-8')
+c = f.read()
+f.close()
+start = c.find('submitSale')
+print(c[start:start+600])

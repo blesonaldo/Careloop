@@ -25,6 +25,7 @@ class Token(BaseModel):
     token_type: str
 
 class UserResponse(BaseModel):
+    preferred_currency: Optional[str] = "USD"
     id: int
     email: EmailStr
     full_name: Optional[str] = None
@@ -67,3 +68,4 @@ class ChangePasswordResponse(BaseModel):
 class SetInitialPasswordRequest(BaseModel):
     token: str
     password: str
+

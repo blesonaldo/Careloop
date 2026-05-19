@@ -4,6 +4,7 @@ from .notification import Notification
 from .revoked_token import RevokedToken
 from .login_attempt import LoginAttempt
 from .audit_log import AuditLog
+from .sale import Sale
 
 try:
     from .user import User
@@ -24,7 +25,9 @@ except ImportError:
         created_at = Column(DateTime(timezone=True), server_default=func.now())
         updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-__all__ = ["Customer", "User", "Base", "Notification", "RevokedToken", "AuditLog"]
+__all__ = ["Customer", "User", "Base", "Notification", "RevokedToken", "AuditLog", "Sale"]
+
+
 
 
 

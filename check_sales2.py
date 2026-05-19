@@ -1,0 +1,6 @@
+c = open('Frontend/careloop-dashboard.html', encoding='utf-8').read()
+print('loadSales fn:', 'async function loadSales' in c)
+print('currency select:', 'sale-currency' in c)
+print('saveCurrencyPreference:', 'saveCurrencyPreference' in c)
+print('api sales call:', '/api/sales' in c)
+print('currency symbols:', 'symbols=' in c or 'symbols =' in c)

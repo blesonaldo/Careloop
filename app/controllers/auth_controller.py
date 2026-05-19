@@ -302,7 +302,8 @@ class AuthController:
             is_active=user.is_active,
             created_at=user.created_at,
             updated_at=user.updated_at,
-            last_login_at=user.last_login_at
+            last_login_at=user.last_login_at,
+            preferred_currency=getattr(user, 'preferred_currency', 'USD')
         )
 
     @staticmethod
@@ -328,7 +329,8 @@ class AuthController:
             is_active=user.is_active,
             created_at=user.created_at,
             updated_at=user.updated_at,
-            last_login_at=user.last_login_at
+            last_login_at=user.last_login_at,
+            preferred_currency=getattr(user, 'preferred_currency', 'USD')
         )
 
     @staticmethod
