@@ -2104,13 +2104,13 @@ function renderSalesChart(){
         legend:{display:false},
         tooltip:{
           callbacks:{
-            label: ctx=>formatMoney(ctx.raw, preferredCurrency)
+            label: ctx=>formatMoney(ctx.raw, currentUser.preferred_currency || 'USD')
           }
         }
       },
       scales:{
         x:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:11}}},
-        y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:11},callback:v=>formatMoney(v, preferredCurrency)},beginAtZero:true}
+        y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:11},callback:v=>formatMoney(v, currentUser.preferred_currency || 'USD')},beginAtZero:true}
       }
     }
   });
@@ -2452,17 +2452,6 @@ async function logout(){
 }
 
 
-function formatMoney(amount, currency) {
-  currency = currency || preferredCurrency || "USD";
-  try {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: currency }).format(amount || 0);
-  } catch(e) {
-    var symbols = {"USD":"$","EUR":"\u20ac","GBP":"\u00a3","NGN":"\u20a6","GHS":"\u20b5","KES":"KSh","ZAR":"R","CAD":"CA$","AUD":"A$"};
-    var sym = symbols[currency] || currency + " ";
-    return sym + (amount || 0).toFixed(2);
-  }
-}
-
 // --- START ---
 window.addEventListener('DOMContentLoaded',init);
 </script>
@@ -2470,5 +2459,4 @@ window.addEventListener('DOMContentLoaded',init);
 </html>
 
 
-
-
+function formatMoney(amount, currency = "USD"){ return new Intl.NumberFormat("en-US",{ style:"currency", currency:currency }).format(amount || 0); }

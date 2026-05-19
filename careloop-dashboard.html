@@ -922,6 +922,12 @@ body.dark-mode.eye-care {
 }
 .dash-notif-item:last-child{border-bottom:none;}
 
+.cust-type { display: flex; flex-direction: column; gap: 2px; min-width: 160px; }
+.cust-type-name { font-size: .82rem; font-weight: 600; color: var(--text); }
+.cust-type-name.active { color: var(--green); }
+.cust-type-name.inactive { color: var(--yellow); }
+.cust-type-note { font-size: .72rem; color: var(--text3); line-height: 1.4; max-width: 200px; }
+
 /* Tooltip text */
 .section-tip{font-size:.72rem;color:var(--text3);margin-left:4px;}
 .mode-toggle {
@@ -1790,7 +1796,7 @@ function renderCustomers(){
         <div class="cust-name">${esc(c.name)}</div>
         <div class="cust-meta">Last Purchase: ${c.lastContact?fmtDate(c.lastContact):'None'}</div>
       </div>
-      <div class="cust-type">${c.customer_type==='active'?'Existing Customer':'New Customer'}</div>
+      <div class="cust-type">${custTypeLabel(c)}</div>
       <div class="cust-actions">
         <button class="btn-send" onclick="openMessageModal(${c.id});showPage('dashboard')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.032 2.001a9.995 9.995 0 0 0-9.032 13.776l-1.998 5.233a1 1 0 0 0 1.257 1.23l5.047-1.68A9.991 9.991 0 0 0 12.032 22.002c5.517 0 10-4.483 10-10s-4.483-10-10-10z"/></svg>
@@ -1817,7 +1823,7 @@ function openViewPanel(id){
     <div class="panel-name">${esc(c.name)}</div>
     <div class="panel-sub">${c.lastContact?'Last Purchase: '+fmtDate(c.lastContact):'No purchases yet'}</div>
     <div class="panel-divider"></div>
-    <div class="panel-field"><span class="panel-field-label">Status</span><span class="panel-field-value">${c.customer_type==='active'?'Existing Customer':'New Customer'}</span></div>
+    <div class="panel-field"><span class="panel-field-label">Status</span><span class="panel-field-value">${custTypeLabel(c)}</span></div>
     <div class="panel-field"><span class="panel-field-label">Relationship Status</span><span class="panel-field-value">Active</span></div>
     <div class="panel-field"><span class="panel-field-label">Next suggested follow-up:</span><span class="panel-field-value">${nextFollowup}</span></div>
     <button class="btn-save-cust" onclick="closePanel()">Save Customer</button>
@@ -2104,13 +2110,13 @@ function renderSalesChart(){
         legend:{display:false},
         tooltip:{
           callbacks:{
-            label: ctx=>formatMoney(ctx.raw, preferredCurrency)
+            label: ctx=>'$'+ctx.raw.toLocaleString('en-US',{minimumFractionDigits:2})
           }
         }
       },
       scales:{
         x:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:11}}},
-        y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:11},callback:v=>formatMoney(v, preferredCurrency)},beginAtZero:true}
+        y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:11},callback:v=>'$'+v.toLocaleString()},beginAtZero:true}
       }
     }
   });
@@ -2138,7 +2144,7 @@ function renderSalesTable(){
   tbody.innerHTML = filtered.map((s,i)=>{
     const c = customers.find(x=>String(x.id)===String(s.customerId));
     const name = c?esc(c.name):'Unknown';
-    const amt = formatMoney(s.amount, s.currency);
+    const amt = '$'+(s.amount||0).toLocaleString('en-US',{minimumFractionDigits:2});
     const prod = esc(s.product||'—');
     const date = new Date(s.date).toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'});
     const bg = i%2===0?'var(--bg)':'var(--bg2)';
@@ -2158,7 +2164,7 @@ function downloadSalesCSV(){
     const c = customers.find(x=>String(x.id)===String(s.customerId));
     rows.push([
       c?c.name:'Unknown',
-      formatMoney(s.amount, s.currency),
+      (s.amount||0).toFixed(2),
       s.product||'',
       new Date(s.date).toLocaleDateString()
     ]);
