@@ -5,7 +5,441 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Careloop</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
+
+/* ========== RESPONSIVE & MOBILE-FRIENDLY ADDITIONS ========== */
+/* These styles override the existing layout for better mobile experience */
+
+/* Mobile menu toggle button */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 10px;
+  color: var(--text2);
+  transition: all 0.2s;
+  margin-right: 4px;
+}
+.mobile-menu-toggle:hover {
+  background: var(--bg2);
+}
+.mobile-menu-toggle svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+}
+
+/* Sidebar overlay for mobile */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 90;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+}
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+  /* Show mobile menu toggle */
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Sidebar becomes off-canvas */
+  .sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    z-index: 100;
+    box-shadow: none;
+    border-right: 1px solid var(--border);
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Main content full width */
+  .main {
+    margin-left: 0 !important;
+    padding: 76px 16px 24px !important;
+  }
+  
+  /* Header adjustments */
+  .header {
+    padding: 0 12px;
+  }
+  .header-label {
+    font-size: 0.9rem;
+    min-width: auto;
+  }
+  .header-search {
+    max-width: 180px;
+    padding: 6px 12px;
+  }
+  .header-search input {
+    font-size: 0.75rem;
+  }
+  .bell-btn, .avatar-btn, .avatar-chevron {
+    width: 34px;
+    height: 34px;
+  }
+  
+  /* Page title */
+  .page-title {
+    font-size: 1.5rem;
+  }
+  .page-top {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .action-row {
+    width: 100%;
+    gap: 12px;
+  }
+  .action-row .btn-primary,
+  .action-row .btn-outline {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+  
+  /* Stats grid - 1 column on mobile */
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    padding: 16px 20px;
+  }
+  .stat-value {
+    font-size: 1.8rem;
+  }
+  
+  /* Tabs - scrollable horizontally */
+  .tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    gap: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
+  }
+  .tab {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  .tab-badge {
+    padding: 2px 6px;
+    font-size: 0.65rem;
+  }
+  
+  /* Follow-up rows - card style on mobile */
+  .followup-row {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .row-check {
+    order: -2;
+  }
+  .row-avatar {
+    order: -1;
+    width: 48px;
+    height: 48px;
+  }
+  .row-info {
+    flex: 1 1 100%;
+    margin-left: 0;
+    width: 100%;
+  }
+  .row-reason {
+    flex: 1 1 100%;
+    margin-left: 0;
+    font-size: 0.8rem;
+    padding-left: 0;
+  }
+  .row-actions {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .btn-send, .btn-snooze, .btn-done {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+  }
+  .btn-send svg, .btn-snooze svg, .btn-done svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  /* Section headers */
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+  .section-header > div:last-child {
+    align-self: flex-end;
+  }
+  .mark-all-btn, .view-all-btn {
+    font-size: 0.75rem;
+  }
+  
+  /* Customers page - card layout */
+  .customer-row {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .cust-check {
+    order: -2;
+  }
+  .row-avatar {
+    order: -1;
+  }
+  .cust-info {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+  .cust-type {
+    flex: 1 1 auto;
+    min-width: auto;
+    font-size: 0.75rem;
+  }
+  .cust-actions {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  .view-cust-btn {
+    font-size: 0.75rem;
+  }
+  
+  /* Customer list table header hidden on mobile? We'll keep but subtle */
+  .customer-list-table > div:first-child:not(.customer-row) {
+    display: none; /* Hide the grid header on mobile */
+  }
+  
+  /* Add customer flow */
+  .add-flow {
+    max-width: 100%;
+  }
+  .flow-title {
+    font-size: 1.5rem;
+  }
+  .phone-row {
+    flex-wrap: wrap;
+  }
+  .phone-flag, .phone-code {
+    padding: 10px 12px;
+  }
+  .phone-input {
+    min-width: 0;
+  }
+  
+  /* Notifications page */
+  .notif-item {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px;
+  }
+  .notif-icon {
+    width: 36px;
+    height: 36px;
+  }
+  .notif-time {
+    margin-left: auto;
+  }
+  
+  /* Modals */
+  .modal-card {
+    width: 92%;
+    max-width: 92%;
+    padding: 24px 20px;
+    margin: 16px;
+  }
+  .success-icon-wrap {
+    width: 60px;
+    height: 60px;
+  }
+  .success-title {
+    font-size: 1.3rem;
+  }
+  
+  /* Slide panel */
+  .slide-panel {
+    width: 85%;
+    max-width: 340px;
+    padding: 24px 20px;
+  }
+  
+  /* Sales page adjustments */
+  #sales-table-wrap > div:first-child {
+    display: none; /* Hide the grid header row on mobile for cleaner look */
+  }
+  #sales-table-body > div {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px;
+    padding: 14px 16px !important;
+  }
+  #sales-table-body > div span:nth-child(1) { grid-column: 1 / -1; font-weight: 700; margin-bottom: 4px; }
+  #sales-table-body > div span:nth-child(2) { grid-column: 1 / 2; }
+  #sales-table-body > div span:nth-child(3) { grid-column: 2 / 3; text-align: right; }
+  #sales-table-body > div span:nth-child(4) { grid-column: 1 / -1; font-size: 0.7rem; color: var(--text3); margin-top: 4px; }
+  
+  /* Revenue chart container */
+  .stat-card[style*="padding:24px"] {
+    padding: 16px !important;
+  }
+  #rev-chart {
+    height: 180px !important;
+  }
+  
+  /* Filter and search on mobile */
+  .filter-right {
+    margin-left: 0 !important;
+  }
+  .customers-search {
+    max-width: 100%;
+    margin-bottom: 16px;
+  }
+  #sales-search {
+    width: 100% !important;
+    margin-top: 8px;
+  }
+  
+  /* Dashboard notification section */
+  .dash-notif-item {
+    padding: 12px 0;
+  }
+  
+  /* Empty state */
+  .empty-state {
+    padding: 40px 20px;
+  }
+  
+  /* Sidebar user info */
+  .sidebar-user {
+    padding: 8px 12px;
+  }
+}
+
+/* Small phones (below 480px) */
+@media (max-width: 480px) {
+  .main {
+    padding: 68px 12px 20px !important;
+  }
+  .page-title {
+    font-size: 1.3rem;
+  }
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  .btn-primary, .btn-outline {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+  .followup-row, .customer-row {
+    padding: 12px;
+  }
+  .row-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+  .row-name {
+    font-size: 0.85rem;
+  }
+  .btn-send, .btn-snooze, .btn-done {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+  }
+  .modal-card {
+    padding: 20px 16px;
+  }
+  .radio-option {
+    padding: 12px 14px;
+  }
+  .section-title {
+    font-size: 0.85rem;
+  }
+}
+
+/* Tablet landscape (between 769px and 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 200px;
+  }
+  .main {
+    margin-left: 200px;
+    padding: 84px 24px 28px;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .followup-row {
+    gap: 12px;
+  }
+}
+
+/* Desktop: ensure sidebar is always visible when not in mobile */
+@media (min-width: 769px) {
+  .sidebar {
+    transform: translateX(0) !important;
+  }
+  .sidebar-overlay {
+    display: none !important;
+  }
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+}
+
+/* Additional touch-friendly improvements */
+button, .nav-item, .tab, .radio-option, .snooze-option {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+input, select, textarea {
+  font-size: 16px !important; /* Prevents zoom on iOS */
+}
+@media (max-width: 768px) {
+  input, select, textarea, button {
+    font-size: 16px;
+  }
+}
+
+
 :root {
   --blue:#3333CC;
   --blue-light:#eeeeff;
@@ -119,6 +553,7 @@ body.dark-mode.eye-care {
   padding:10px 12px;border-radius:var(--radius);
   font-size:.875rem;font-weight:500;color:var(--text2);
   cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left;
+  margin-bottom:4px;
 }
 .nav-item:hover{background:var(--bg2);color:var(--text);}
 .nav-item.active{background:var(--blue-light);color:var(--blue);}
@@ -543,6 +978,9 @@ body.dark-mode.eye-care {
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
+  <div style="padding:20px 16px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;">
+    <img src="/assets/primary_logo.jpg" alt="Careloop" style="height:32px;object-fit:contain;">
+  </div>
   <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
     Home
@@ -552,10 +990,13 @@ body.dark-mode.eye-care {
     Customers
   </button>
   <button class="nav-item" id="nav-add" onclick="showPage('add-customer')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <button class="nav-item" id="nav-sales" onclick="showPage('sales')">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+  Sales
+<button class="nav-item" id="nav-add" onclick="showPage('add-customer')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Add Customer
-  </button>
-  <div class="sidebar-bottom">
+</button>  <div class="sidebar-bottom">
     <div class="sidebar-user">
       <button class="avatar-btn" id="sidebar-avatar" onclick="changeAvatar()"><img id="sidebar-avatar-img" alt=""></button>
       <div class="sidebar-user-info">
@@ -563,6 +1004,10 @@ body.dark-mode.eye-care {
         <div class="biz" id="sidebar-biz">—</div>
       </div>
     </div>
+    <button onclick="logout()" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:50px;border:none;background:#FCEBEB;color:#A32D2D;font-size:14px;font-weight:500;cursor:pointer;margin-top:8px;font-family:inherit;transition:background 0.15s;" onmouseover="this.style.background='#F7C1C1'" onmouseout="this.style.background='#FCEBEB'">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
   </div>
 </aside>
 
@@ -651,6 +1096,73 @@ body.dark-mode.eye-care {
       <!-- Step content injected here -->
     </div>
   </div>
+
+
+<!-- SALES PAGE -->
+<div class="page" id="page-sales">
+  <div class="page-top">
+    <div>
+      <h1 class="page-title">Sales Revenue</h1>
+      <p class="page-sub" id="sales-sub">Loading...</p>
+    </div>
+    <div class="action-row">
+      <button class="btn-primary" onclick="openRecordSaleModal()">+ Record Sale</button>
+      <button class="btn-outline" onclick="downloadSalesCSV()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Revenue stat cards -->
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px;">
+    <div class="stat-card">
+      <div class="stat-label">Total Revenue</div>
+      <div class="stat-value" id="rev-total">$0.00</div>
+      <div class="stat-tag green"><span class="dot green"></span><span>All time</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">This Month</div>
+      <div class="stat-value" id="rev-month">$0.00</div>
+      <div class="stat-tag green"><span class="dot green"></span><span id="rev-month-label">Current month</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Revenue / Customer</div>
+      <div class="stat-value" id="rev-per-cust">$0.00</div>
+      <div class="stat-tag green"><span class="dot green"></span><span>Average</span></div>
+    </div>
+  </div>
+
+  <!-- Bar chart -->
+  <div class="stat-card" style="margin-bottom:28px;padding:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <span style="font-size:1rem;font-weight:700;color:var(--text);">Monthly Revenue</span>
+      <select id="rev-year-filter" onchange="renderSalesPage()" style="padding:6px 12px;border-radius:50px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:.82rem;cursor:pointer;"></select>
+    </div>
+    <div style="position:relative;height:220px;">
+      <canvas id="rev-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- Sales table -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <span style="font-size:1rem;font-weight:700;color:var(--text);">All Sales</span>
+    <input type="text" id="sales-search" placeholder="Search customer or product..." oninput="renderSalesTable()"
+      style="padding:8px 16px;border-radius:50px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text);font-size:.82rem;outline:none;width:240px;">
+  </div>
+  <div class="followup-list" id="sales-table-wrap">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;padding:12px 20px;background:var(--bg2);font-size:.78rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;">
+      <span>Customer</span><span>Amount</span><span>Product / Service</span><span>Date</span>
+    </div>
+    <div id="sales-table-body"></div>
+  </div>
+  <div id="sales-empty" style="display:none;" class="empty-state">
+    <div class="empty-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+    <div class="empty-title">No sales recorded yet.</div>
+    <div class="empty-sub">Record a sale to start tracking revenue.</div>
+    <button class="btn-primary" onclick="openRecordSaleModal()">+ Record Sale</button>
+  </div>
+</div>
 
   <!-- NOTIFICATIONS PAGE -->
   <div class="page" id="page-notifications">
@@ -801,15 +1313,16 @@ function fmtAgo(d){
 function showPage(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const labels={dashboard:'Dashboard',customers:'Customers','add-customer':'Add Customer',notifications:'Notifications'};
+  const labels={dashboard:'Dashboard',customers:'Customers','add-customer':'Add Customer',notifications:'Notifications',sales:'Sales'};
   document.getElementById('header-label').textContent=labels[page]||'Careloop';
   document.getElementById('page-'+page).classList.add('active');
-  const navMap={dashboard:'nav-dashboard',customers:'nav-customers','add-customer':'nav-add'};
+  const navMap={dashboard:'nav-dashboard',customers:'nav-customers','add-customer':'nav-add',sales:'nav-sales'};
   if(navMap[page]) document.getElementById(navMap[page]).classList.add('active');
   if(page==='add-customer') renderAddStep();
   if(page==='notifications') renderNotifPage();
   if(page==='customers') renderCustomers();
   if(page==='dashboard') renderDashboard();
+  if(page==='sales') renderSalesPage();
 }
 
 // ─── AUTH & USER ───
@@ -937,7 +1450,7 @@ async function loadCustomers(){
   const token=localStorage.getItem('authToken'); if(!token) return;
   try{
     const r=await fetch('/api/customers?per_page=100',{headers:{'Authorization':'Bearer '+token}});
-    if(r.ok){const d=await r.json();customers=d.customers||[];}
+    if(r.ok){const d=await r.json();customers=d.items||[];}
     else if(r.status===401){window.location.href='careloop-login.html';}
   }catch(e){
     const s=localStorage.getItem('cl_customers');
@@ -1443,6 +1956,149 @@ async function markAllRead(){
   renderDashNotifs();
   renderNotifPage();
 }
+
+
+// ─── SALES PAGE ───
+let revenueChart = null;
+
+function renderSalesPage(){
+  updateRevenueStats();
+  renderSalesChart();
+  renderSalesTable();
+  const sub = document.getElementById('sales-sub');
+  if(sub) sub.textContent = `${sales.length} sale${sales.length!==1?'s':''} recorded`;
+}
+
+function updateRevenueStats(){
+  const total = sales.reduce((s,x)=>s+(x.amount||0), 0);
+  const now = new Date();
+  const monthSales = sales.filter(s=>{
+    const d = new Date(s.date);
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).reduce((s,x)=>s+(x.amount||0), 0);
+  const uniqueCust = new Set(sales.map(s=>s.customerId)).size;
+  const perCust = uniqueCust ? total/uniqueCust : 0;
+  const fmt = n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  ['rev-total','stat-total-revenue'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmt(total);});
+  ['rev-month','stat-monthly-revenue'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmt(monthSales);});
+  ['rev-per-cust','stat-revenue-per-customer'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmt(perCust);});
+  const ml = document.getElementById('rev-month-label');
+  if(ml) ml.textContent = now.toLocaleString('default',{month:'long'});
+}
+
+function renderSalesChart(){
+  const canvas = document.getElementById('rev-chart');
+  if(!canvas) return;
+
+  // Populate year filter
+  const yearFilter = document.getElementById('rev-year-filter');
+  const years = [...new Set(sales.map(s=>new Date(s.date).getFullYear()))].sort((a,b)=>b-a);
+  const currentYear = new Date().getFullYear();
+  if(!years.includes(currentYear)) years.unshift(currentYear);
+  const selectedYear = parseInt(yearFilter.value) || currentYear;
+  yearFilter.innerHTML = years.map(y=>`<option value="${y}" ${y===selectedYear?'selected':''}>${y}</option>`).join('');
+
+  // Build monthly totals
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const totals = Array(12).fill(0);
+  sales.forEach(s=>{
+    const d = new Date(s.date);
+    if(d.getFullYear()===selectedYear) totals[d.getMonth()] += s.amount||0;
+  });
+
+  // Destroy old chart
+  if(revenueChart) revenueChart.destroy();
+
+  const isDark = document.body.classList.contains('dark-mode');
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const labelColor = isDark ? '#9ca3af' : '#6b7280';
+
+  revenueChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets:[{
+        label: 'Revenue',
+        data: totals,
+        backgroundColor: 'rgba(51,51,204,0.75)',
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options:{
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label: ctx=>'$'+ctx.raw.toLocaleString('en-US',{minimumFractionDigits:2})
+          }
+        }
+      },
+      scales:{
+        x:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:11}}},
+        y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:11},callback:v=>'$'+v.toLocaleString()},beginAtZero:true}
+      }
+    }
+  });
+}
+
+function renderSalesTable(){
+  const q = (document.getElementById('sales-search')||{}).value?.toLowerCase()||'';
+  const tbody = document.getElementById('sales-table-body');
+  const empty = document.getElementById('sales-empty');
+  const wrap = document.getElementById('sales-table-wrap');
+  if(!sales.length){
+    wrap.style.display='none'; empty.style.display='block'; return;
+  }
+  wrap.style.display='block'; empty.style.display='none';
+  const filtered = sales.filter(s=>{
+    const c = customers.find(x=>String(x.id)===String(s.customerId));
+    const name = c?c.name.toLowerCase():'';
+    const prod = (s.product||'').toLowerCase();
+    return !q || name.includes(q) || prod.includes(q);
+  }).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!filtered.length){
+    tbody.innerHTML='<div style="padding:32px;text-align:center;color:var(--text2);font-size:.85rem;">No matching sales.</div>';
+    return;
+  }
+  tbody.innerHTML = filtered.map((s,i)=>{
+    const c = customers.find(x=>String(x.id)===String(s.customerId));
+    const name = c?esc(c.name):'Unknown';
+    const amt = '$'+(s.amount||0).toLocaleString('en-US',{minimumFractionDigits:2});
+    const prod = esc(s.product||'—');
+    const date = new Date(s.date).toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'});
+    const bg = i%2===0?'var(--bg)':'var(--bg2)';
+    return `<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;padding:14px 20px;background:${bg};border-top:1px solid var(--border);font-size:.875rem;align-items:center;">
+      <span style="font-weight:600;color:var(--text);">${name}</span>
+      <span style="font-weight:700;color:var(--green);">${amt}</span>
+      <span style="color:var(--text2);">${prod}</span>
+      <span style="color:var(--text3);">${date}</span>
+    </div>`;
+  }).join('');
+}
+
+function downloadSalesCSV(){
+  if(!sales.length){alert('No sales to download.');return;}
+  const rows = [['Customer','Amount','Product/Service','Date']];
+  sales.forEach(s=>{
+    const c = customers.find(x=>String(x.id)===String(s.customerId));
+    rows.push([
+      c?c.name:'Unknown',
+      (s.amount||0).toFixed(2),
+      s.product||'',
+      new Date(s.date).toLocaleDateString()
+    ]);
+  });
+  const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='careloop-sales.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ─── MODAL HELPERS ───
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
@@ -1459,9 +2115,275 @@ function handleGlobalSearch(q){
     if(el){el.value=q;renderCustomers();}
   },50);
 }
+// ========== MOBILE RESPONSIVE ENHANCEMENTS ==========
+// Adds hamburger menu toggle, sidebar overlay, and auto-closing on navigation
 
-// ─── START ───
+(function() {
+  // Wait for DOM to be ready
+  function initMobileResponsive() {
+    // Check if we already added the mobile menu button to avoid duplication
+    if (document.querySelector('.mobile-menu-toggle')) return;
+    
+    // Create hamburger button
+    const header = document.querySelector('.header');
+    if (!header) return;
+    
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'mobile-menu-toggle';
+    toggleBtn.setAttribute('aria-label', 'Menu');
+    toggleBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    `;
+    
+    // Insert at the beginning of header (before the header-label)
+    const headerLabel = document.querySelector('.header-label');
+    if (headerLabel) {
+      header.insertBefore(toggleBtn, headerLabel);
+    } else {
+      header.prepend(toggleBtn);
+    }
+    
+    // Create overlay for sidebar
+    let overlay = document.querySelector('.sidebar-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.className = 'sidebar-overlay';
+      document.body.appendChild(overlay);
+    }
+    
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+    
+    // Function to open mobile sidebar
+    function openMobileSidebar() {
+      sidebar.classList.add('mobile-open');
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    // Function to close mobile sidebar
+    function closeMobileSidebar() {
+      sidebar.classList.remove('mobile-open');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    // Toggle function
+    function toggleMobileSidebar() {
+      if (sidebar.classList.contains('mobile-open')) {
+        closeMobileSidebar();
+      } else {
+        openMobileSidebar();
+      }
+    }
+    
+    // Event listeners
+    toggleBtn.addEventListener('click', toggleMobileSidebar);
+    overlay.addEventListener('click', closeMobileSidebar);
+    
+    // Close sidebar when a navigation item is clicked (on mobile only)
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+      item.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+          closeMobileSidebar();
+        }
+      });
+    });
+    
+    // Also close when clicking on sidebar user area or any interactive inside sidebar
+    const sidebarContent = sidebar.querySelectorAll('button, a, .sidebar-user');
+    sidebarContent.forEach(el => {
+      el.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768 && !e.target.closest('.mobile-menu-toggle')) {
+          // Small delay to allow navigation to happen first, then close
+          setTimeout(closeMobileSidebar, 150);
+        }
+      });
+    });
+    
+    // Handle window resize: if resizing from mobile to desktop, ensure sidebar visible
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 768) {
+        closeMobileSidebar();
+        sidebar.classList.remove('mobile-open');
+        document.body.style.overflow = '';
+      }
+    });
+    
+    // When page changes (showPage) on mobile, close sidebar automatically
+    const originalShowPage = window.showPage;
+    if (typeof originalShowPage === 'function') {
+      window.showPage = function(page) {
+        originalShowPage(page);
+        if (window.innerWidth <= 768) {
+          closeMobileSidebar();
+        }
+      };
+    }
+  }
+  
+  // Run after DOM is fully loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobileResponsive);
+  } else {
+    initMobileResponsive();
+  }
+})();
+
+// Additional responsive fix: redraw charts on orientation change
+// (prevents chart distortion after device rotation)
+if (typeof renderSalesChart === 'function') {
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      if (document.getElementById('page-sales') && document.getElementById('page-sales').classList.contains('active')) {
+        if (typeof renderSalesChart === 'function') {
+          renderSalesChart();
+        }
+      }
+    }, 250);
+  });
+}
+
+// Improved touch scrolling for tabs on mobile
+document.addEventListener('DOMContentLoaded', function() {
+  const tabsContainer = document.querySelector('.tabs');
+  if (tabsContainer && window.innerWidth <= 768) {
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    
+    tabsContainer.addEventListener('mousedown', (e) => {
+      isDown = true;
+      startX = e.pageX - tabsContainer.offsetLeft;
+      scrollLeft = tabsContainer.scrollLeft;
+    });
+    tabsContainer.addEventListener('mouseleave', () => {
+      isDown = false;
+    });
+    tabsContainer.addEventListener('mouseup', () => {
+      isDown = false;
+    });
+    tabsContainer.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - tabsContainer.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      tabsContainer.scrollLeft = scrollLeft - walk;
+    });
+    
+    // Touch events for mobile
+    tabsContainer.addEventListener('touchstart', (e) => {
+      isDown = true;
+      startX = e.touches[0].pageX - tabsContainer.offsetLeft;
+      scrollLeft = tabsContainer.scrollLeft;
+    });
+    tabsContainer.addEventListener('touchend', () => {
+      isDown = false;
+    });
+    tabsContainer.addEventListener('touchmove', (e) => {
+      if (!isDown) return;
+      const x = e.touches[0].pageX - tabsContainer.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      tabsContainer.scrollLeft = scrollLeft - walk;
+    });
+  }
+});
+
+// Adjust customer table display for mobile - hides the header row
+function enhanceCustomerTableMobile() {
+  const customerTable = document.querySelector('.customer-list-table');
+  if (customerTable && window.innerWidth <= 768) {
+    const firstChild = customerTable.firstElementChild;
+    if (firstChild && !firstChild.classList.contains('customer-row')) {
+      // If it's a grid header, add class to hide via CSS
+      firstChild.style.display = 'none';
+    }
+  }
+}
+
+// Run on page loads and resize
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', enhanceCustomerTableMobile);
+} else {
+  enhanceCustomerTableMobile();
+}
+window.addEventListener('resize', function() {
+  enhanceCustomerTableMobile();
+  // Re-render customers if page is active to adjust layout
+  if (document.getElementById('page-customers') && document.getElementById('page-customers').classList.contains('active')) {
+    if (typeof renderCustomers === 'function') {
+      renderCustomers();
+    }
+  }
+  // Re-render sales table to adjust layout on resize
+  if (document.getElementById('page-sales') && document.getElementById('page-sales').classList.contains('active')) {
+    if (typeof renderSalesTable === 'function') {
+      renderSalesTable();
+    }
+  }
+});
+
+// Make sure follow-up rows and customer rows adapt when rendered
+// Monkey-patch render functions to trigger layout adjustments if needed
+if (typeof buildRow === 'function') {
+  const originalBuildRow = buildRow;
+  window.buildRow = function(c) {
+    return originalBuildRow(c);
+  };
+}
+
+// Add viewport meta for proper scaling if not already present
+(function ensureViewport() {
+  if (!document.querySelector('meta[name="viewport"]')) {
+    const meta = document.createElement('meta');
+    meta.name = 'viewport';
+    meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover';
+    document.head.appendChild(meta);
+  }
+})();
+
+// Small fix: ensure that modals are centered properly on mobile
+function fixModalPosition() {
+  const modals = document.querySelectorAll('.modal-backdrop');
+  modals.forEach(modal => {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.classList.remove('open');
+      }
+    });
+  });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', fixModalPosition);
+} else {
+  fixModalPosition();
+}
+async function logout(){
+  const token=localStorage.getItem('authToken');
+  try{
+    await fetch('/api/auth/logout',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+token}
+    });
+  }catch(e){}
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('cl_user');
+  localStorage.removeItem('cl_customers');
+  window.location.href='careloop-login.html';
+}
+
+
+// --- START ---
 window.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
 </html>
+
+

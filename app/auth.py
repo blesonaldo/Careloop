@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Depends, status, Request
 from fastapi.responses import HTMLResponse
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.rate_limit import RateLimitedRouter
 from app.database import get_db
 from app.controllers.auth_controller import AuthController
-from app.services.auth_service import TokenService
 from app.schemas.user import (
     UserCreate, UserCreateResponse, UserLogin, Token, UserResponse,
     ForgotPasswordRequest, ForgotPasswordResponse,
@@ -16,7 +14,6 @@ from app.schemas.user import (
 from app.dependencies import get_current_user_id
 
 router = RateLimitedRouter(prefix="/auth", tags=["authentication"], limit="20/minute")
-security = HTTPBearer()
 
 @router.post("/signup", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED)
 async def signup(
@@ -32,7 +29,8 @@ async def login(
     login_data: UserLogin,
     db: AsyncSession = Depends(get_db)
 ):
-    result = await AuthController.authenticate_user(db, login_data, ip_address=request.client.host)
+    result = await AuthController.authenticate_user(db, login_data)
+    print(f"Login response: {result}")
     return result
 
 @router.get("/verify-email")
@@ -86,25 +84,6 @@ async def get_current_user(
 ):
     return await AuthController.get_current_user(db, user_id)
 
-@router.post("/logout")
-async def logout(
-    request: Request,
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    user_id: int = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db)
-):
-    from app.models.revoked_token import RevokedToken
-    from datetime import datetime
-    import jwt, os
-    token = credentials.credentials
-    jti = TokenService.get_jti(token)
-    if jti:
-        payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=["HS256"])
-        expires_at = datetime.utcfromtimestamp(payload["exp"])
-        db.add(RevokedToken(jti=jti, expires_at=expires_at))
-        await db.commit()
-    return {"message": "Successfully logged out"}
-
 @router.post("/set-initial-password")
 async def set_initial_password(
     request: Request,
@@ -112,4 +91,3 @@ async def set_initial_password(
     db: AsyncSession = Depends(get_db)
 ):
     return await AuthController.set_initial_password(db, body.token, body.password)
-

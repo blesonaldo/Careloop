@@ -3,8 +3,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
 
 async def verify():
-    # Replace with your actual database URL
-    DATABASE_URL = "sqlite+aiosqlite:///./careloop.db"  # or postgresql+asyncpg://...
+    DATABASE_URL = "sqlite+aiosqlite:///./careloop.db"  
     engine = create_async_engine(DATABASE_URL)
     async with engine.connect() as conn:
         # For SQLite

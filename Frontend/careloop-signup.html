@@ -6,6 +6,128 @@
     <title>Careloop - Sign Up</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+
+        /* ============================================
+   CARELOOP — MOBILE RESPONSIVE (paste into every page)
+   ============================================ */
+@media (max-width: 480px) {
+
+  body {
+    padding: 0;
+    align-items: flex-start;
+    min-height: 100dvh;
+  }
+
+  .container {
+    max-width: 100%;
+    width: 100%;
+    padding: 80px 24px 40px;
+    min-height: 100dvh;
+  }
+
+  /* Logo */
+  .logo-container { margin-bottom: 1.5rem; }
+  #logo-img { height: 32px; }
+
+  /* Headings */
+  h1 {
+    font-size: 1.75rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .subtext {
+    font-size: 13px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Inputs */
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="tel"] {
+    font-size: 16px; /* prevents iOS zoom on focus */
+    padding: 14px 16px;
+    border-radius: 10px;
+  }
+
+  .password-wrapper input {
+    padding-right: 48px;
+  }
+
+  /* Buttons */
+  .primary-button,
+  .submit-button,
+  .proceed-button,
+  .access-button {
+    padding: 16px;
+    font-size: 15px;
+    border-radius: 50px;
+    width: 100%;
+  }
+
+  /* Forgot password link */
+  .forgot-password-link { margin-bottom: 1.2rem; }
+
+  /* Bottom links */
+  .signup-link,
+  .back-link { font-size: 13px; margin-top: 1.2rem; }
+
+  /* Password rules popover — make static on mobile */
+  .password-rules,
+  .password-conditions {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    margin-top: 10px;
+    border-radius: 10px;
+  }
+
+  /* ── Modals / Overlays ── */
+  .success-overlay,
+  .reset-overlay {
+    padding: 24px;
+    align-items: flex-end; /* sheet slides up from bottom */
+  }
+
+  .success-modal,
+  .reset-modal {
+    border-radius: 20px 20px 16px 16px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .success-icon,
+  .reset-icon {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 18px;
+  }
+
+  .success-title { font-size: 1.4rem; }
+  .success-message { font-size: 13px; }
+
+  /* email-verified.html */
+  .success-container {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 80px 24px 40px;
+    min-height: 100dvh;
+  }
+
+  .btn { width: 100%; justify-content: center; }
+  .btn-container { flex-direction: column; gap: 10px; }
+  .additional-info { margin-top: 28px; }
+
+  /* signup-success.html */
+  .instructions { padding: 1rem; }
+  .email-highlight { padding: 0.75rem; }
+}
+
+@media (max-width: 360px) {
+  h1 { font-size: 1.5rem; }
+  .container { padding: 60px 20px 32px; }
+}
         * {
             margin: 0;
             padding: 0;

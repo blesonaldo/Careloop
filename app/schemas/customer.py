@@ -1,42 +1,43 @@
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel, Field
-from app.models.customer import CustomerType
+from enum import Enum
 
+class CustomerType(str, Enum):
+    active = "active"
+    new = "new"
 
-class CustomerBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255, description="Customer name")
-    phone_number: str = Field(..., min_length=10, max_length=20, description="WhatsApp phone number")
-    email: str = Field(..., description="Customer email")
-    date_of_birth: Optional[datetime] = Field(None, description="Customer date of birth")
-    customer_type: CustomerType = Field(CustomerType.NEW, description="Customer type")
-
-
-class CustomerCreate(CustomerBase):
-    pass
-
+class CustomerCreate(BaseModel):
+    name: str
+    phone_number: Optional[str] = None
+    email: Optional[EmailStr] = None
+    customer_type: Optional[CustomerType] = CustomerType.new
+    has_purchased: Optional[bool] = False
 
 class CustomerUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=255, description="Customer name")
-    phone_number: Optional[str] = Field(None, min_length=10, max_length=20, description="WhatsApp phone number")
-    email: Optional[str] = Field(None, description="Customer email")
-    date_of_birth: Optional[datetime] = Field(None, description="Customer date of birth")
-    customer_type: Optional[CustomerType] = Field(None, description="Customer type")
-    has_purchased: Optional[bool] = Field(None, description="Whether customer has made a purchase")
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[EmailStr] = None
+    customer_type: Optional[CustomerType] = None
+    has_purchased: Optional[bool] = None
+    last_contact: Optional[datetime] = None
 
+class CustomerResponse(BaseModel):
+    model_config = {"from_attributes": True}
 
-class CustomerResponse(CustomerBase):
     id: int
-    has_purchased: bool
+    name: str
+    phone_number: Optional[str] = None
+    email: Optional[EmailStr] = None
+    customer_type: CustomerType = CustomerType.new
+    has_purchased: bool = False
+    last_contact: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
-
+    user_id: int
 
 class CustomerListResponse(BaseModel):
-    customers: List[CustomerResponse]
+    items: list[CustomerResponse]
     total: int
     page: int
     per_page: int

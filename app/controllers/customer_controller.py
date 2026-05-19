@@ -94,7 +94,7 @@ class CustomerController:
         total_pages = (total + per_page - 1) // per_page
         
         return CustomerListResponse(
-            customers=customers,
+        items=customers,
             total=total,
             page=page,
             per_page=per_page,
@@ -199,3 +199,4 @@ class CustomerController:
         )
         result = await db.execute(query)
         return result.scalar_one_or_none()
+

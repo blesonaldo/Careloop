@@ -1,21 +1,25 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-import os
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 
-# Database URL - Force SQLite for development
 DATABASE_URL = "sqlite+aiosqlite:///careloop.db"
 
-# Create async engine
 engine = create_async_engine(DATABASE_URL, echo=True)
 
-# Create async session factory
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.close()
+
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-# Base class for models
 Base = declarative_base()
 
-# Dependency to get database session
 async def get_db() -> AsyncSession:
     async with AsyncSessionLocal() as session:
         try:
@@ -23,7 +27,6 @@ async def get_db() -> AsyncSession:
         finally:
             await session.close()
 
-# Initialize database
 async def init_db():
     try:
         async with engine.begin() as conn:

@@ -1,27 +1,27 @@
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, FileResponse, Response
+from fastapi.responses import HTMLResponse, Response, JSONResponse
 from dotenv import load_dotenv
+import logging
+from pydantic import ValidationError
 
-# Load environment variables from .env file
 load_dotenv()
-from app.database import get_db, init_db
-from app.models import Customer, User, notification
+from app.database import get_db
+from app.models import Customer, User
 from app.routes import auth, user, customer, message, notification
 from fastapi import APIRouter
-from app.routes import notification
-from app.schemas.user import UserResponse, ResetPasswordRequest, SetInitialPasswordRequest
+from app.schemas.user import ResetPasswordRequest, SetInitialPasswordRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.controllers.auth_controller import AuthController
-import os
 
-# Ensure all models are imported for database initialization
-# from app.models import *
+from app.rate_limit import limiter, RateLimitedRouter, add_rate_limit_exception_handler
+
+logging.basicConfig(level=logging.DEBUG)
 
 app = FastAPI(
+    redirect_slashes=False,
     title="Careloop API",
     description="Customer Relationship Management API for Small Businesses",
     version="1.0.0",
@@ -29,39 +29,43 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS middleware
+# Add validation error middleware
+@app.middleware("http")
+async def catch_validation_errors(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        return response
+    except ValidationError as e:
+        logging.error(f"Validation error for {request.url.path}: {e.errors()}")
+        return JSONResponse(status_code=422, content={"detail": e.errors()})
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Database initialization
 from app.database import engine
-from app.models.user import User
 from app.models.base import Base
 
 @app.on_event("startup")
 async def init_db():
     async with engine.begin() as conn:
-        # For SQLite, run sync create_all within async context
         await conn.run_sync(Base.metadata.create_all)
 
-
+add_rate_limit_exception_handler(app)
 
 @app.get("/api/auth/verify-email")
 async def verify_email(token: str, db: AsyncSession = Depends(get_db)):
     result = await AuthController.verify_email(db, token)
     return result
-# Create main router for unified routing
+
 main_router = APIRouter()
 
-# Frontend page routes
 @main_router.get("/", response_class=HTMLResponse)
 async def serve_signup():
-    """Serve the signup page as the default route."""
     try:
         with open("Frontend/careloop-signup.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -70,7 +74,6 @@ async def serve_signup():
 
 @main_router.get("/login", response_class=HTMLResponse)
 async def serve_login_page():
-    """Serve the login page."""
     try:
         with open("Frontend/careloop-login.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -79,7 +82,6 @@ async def serve_login_page():
 
 @main_router.get("/dashboard", response_class=HTMLResponse)
 async def serve_dashboard_page():
-    """Serve the dashboard page."""
     try:
         with open("Frontend/careloop-dashboard.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -88,7 +90,6 @@ async def serve_dashboard_page():
 
 @main_router.get("/reports", response_class=HTMLResponse)
 async def serve_reports_page():
-    """Serve the reports page."""
     try:
         with open("Frontend/careloop-reports.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -97,7 +98,6 @@ async def serve_reports_page():
 
 @main_router.get("/forgot-password", response_class=HTMLResponse)
 async def serve_forgot_password_page():
-    """Serve the forgot password page."""
     try:
         with open("Frontend/forgot-password.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -106,7 +106,6 @@ async def serve_forgot_password_page():
 
 @main_router.get("/reset-password", response_class=HTMLResponse)
 async def serve_reset_password_page():
-    """Serve the reset password page."""
     try:
         with open("Frontend/reset-password.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -115,84 +114,60 @@ async def serve_reset_password_page():
 
 @main_router.get("/create-password", response_class=HTMLResponse)
 async def serve_create_password_page():
-    """Serve the create password page."""
     try:
         with open("Frontend/create-password.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
     except FileNotFoundError:
         return HTMLResponse(content="<h1>Create password page not found</h1>", status_code=404)
 
-# Mount static files directory
 app.mount("/assets", StaticFiles(directory="Frontend/assets"), name="assets")
-
-# Include the main router for frontend routes
 app.include_router(main_router)
-
-# Include API routes
 app.include_router(auth.router, prefix="/api")
 
-# Add direct route for email verification (without /api prefix)
 @app.get("/verify-email")
 async def verify_email_redirect(token: str, db: AsyncSession = Depends(get_db)):
-    """Verify user email address and redirect to email-verified page."""
     from app.controllers.auth_controller import AuthController
     await AuthController.verify_email(db, token)
-    
-    # Serve the email-verified.html file with token injected
     try:
         with open("Frontend/email-verified.html", "r", encoding="utf-8") as f:
             html = f.read()
-            print(f"Original HTML contains create-password link: {'href="/create-password"' in html}")
-            # Replace the create-password link with token
             html = html.replace('href="/create-password"', f'href="/create-password?token={token}"')
-            print(f"After replacement HTML contains token: {'token=' in html}")
             return HTMLResponse(content=html)
     except FileNotFoundError:
         return HTMLResponse(content=f"<h1>Email verified successfully!</h1><p><a href='/create-password?token={token}'>Create Password</a></p>", status_code=200)
 
-# Add favicon route to prevent 404 error
 @app.get("/favicon.ico")
 async def favicon():
-    """Return favicon."""
     try:
         with open("Frontend/favicon.ico", "rb") as f:
             return Response(content=f.read(), media_type="image/x-icon")
     except FileNotFoundError:
-        # Return a simple 1x1 pixel favicon
         return Response(content=b"", media_type="image/x-icon")
 
-# Add direct route for reset password (without router prefix)
 @app.get("/reset-password")
 async def reset_password_page():
-    """Serve the reset password page."""
     try:
         with open("Frontend/reset-password.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
     except FileNotFoundError:
         return HTMLResponse(content="<h1>Reset password page not found</h1>", status_code=404)
 
-# Add direct POST route for password reset (without router prefix)
 @app.post("/reset-password")
 async def reset_password_submit(request: ResetPasswordRequest, db: AsyncSession = Depends(get_db)):
-    """Reset user password."""
     from app.schemas.user import ResetPasswordRequest
     from app.controllers.auth_controller import AuthController
     return await AuthController.reset_password(db, request)
 
-# Add direct route for signup success page (without router prefix)
 @app.get("/signup-success", response_class=HTMLResponse)
 async def serve_signup_success_page():
-    """Serve the signup success page."""
     try:
         with open("Frontend/signup-success.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
     except FileNotFoundError:
         return HTMLResponse(content="<h1>Page not found</h1>", status_code=404)
 
-# Add direct route for set-initial-password (without router prefix)
 @app.post("/set-initial-password")
 async def set_initial_password_submit(request: SetInitialPasswordRequest, db: AsyncSession = Depends(get_db)):
-    """Set initial password after email verification."""
     from app.schemas.user import SetInitialPasswordRequest
     from app.controllers.auth_controller import AuthController
     return await AuthController.set_initial_password(db, request.token, request.password)
@@ -204,7 +179,6 @@ app.include_router(notification.router)
 
 @app.get("/careloop-signup.html", response_class=HTMLResponse)
 async def serve_signup_page():
-    """Serve the signup page."""
     try:
         with open("Frontend/careloop-signup.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -213,7 +187,6 @@ async def serve_signup_page():
 
 @app.get("/careloop-login.html", response_class=HTMLResponse)
 async def serve_login_page():
-    """Serve the login page."""
     try:
         with open("Frontend/careloop-login.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -222,7 +195,6 @@ async def serve_login_page():
 
 @app.get("/careloop-dashboard.html", response_class=HTMLResponse)
 async def serve_dashboard_page():
-    """Serve the dashboard page."""
     try:
         with open("Frontend/careloop-dashboard.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -231,7 +203,6 @@ async def serve_dashboard_page():
 
 @app.get("/forgot-password.html", response_class=HTMLResponse)
 async def serve_forgot_password_page():
-    """Serve the forgot password page."""
     try:
         with open("Frontend/forgot-password.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -240,7 +211,6 @@ async def serve_forgot_password_page():
 
 @app.get("/reset-password.html", response_class=HTMLResponse)
 async def serve_reset_password_page():
-    """Serve the reset password page."""
     try:
         with open("Frontend/reset-password.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -249,7 +219,6 @@ async def serve_reset_password_page():
 
 @app.get("/create-password.html", response_class=HTMLResponse)
 async def serve_create_password_page():
-    """Serve the create password page."""
     try:
         with open("Frontend/create-password.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -258,7 +227,6 @@ async def serve_create_password_page():
 
 @app.get("/customers.html", response_class=HTMLResponse)
 async def serve_customers_page():
-    """Serve the customers page."""
     try:
         with open("Frontend/customers.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -275,15 +243,12 @@ async def api_root():
 
 @app.get("/test-db")
 async def test_database():
-    """Test database connection."""
     try:
         async for db in get_db():
             result = await db.execute(select(Customer).limit(1))
             customers = result.scalars().all()
-            
             result = await db.execute(select(User).limit(1))
             users = result.scalars().all()
-            
             return {
                 "status": "connected", 
                 "customer_count": len(customers),
@@ -297,20 +262,12 @@ async def test_database():
             "message": "Database connection failed"
         }
 
-@app.get("/customers")
-async def get_customers():
-    """Get all customers."""
-    try:
-        async for db in get_db():
-            result = await db.execute(select(Customer))
-            customers = result.scalars().all()
-            return {"customers": [{"id": c.id, "name": c.name, "email": c.email} for c in customers]}
+
     except Exception as e:
         return {"error": str(e)}
 
 @app.get("/users")
 async def get_users():
-    """Get all users (for testing)."""
     try:
         async for db in get_db():
             result = await db.execute(select(User))
@@ -322,3 +279,4 @@ async def get_users():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
+

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from pydantic import BaseModel
@@ -6,10 +6,11 @@ from typing import Optional
 from datetime import datetime
 
 from app.database import get_db
-from app.routes.auth import get_current_user_id
+from app.dependencies import get_current_user_id
 from app.models.notification import Notification
+from app.rate_limit import RateLimitedRouter
 
-router = APIRouter(prefix="/api/notifications", tags=["notifications"])
+router = RateLimitedRouter(prefix="/api/notifications", tags=["notifications"], limit="30/minute")
 
 class NotificationCreate(BaseModel):
     type: str
@@ -29,6 +30,7 @@ class NotificationResponse(BaseModel):
 
 @router.get("", response_model=list[NotificationResponse])
 async def get_notifications(
+    request: Request,
     user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
@@ -42,16 +44,12 @@ async def get_notifications(
 
 @router.post("", response_model=NotificationResponse)
 async def create_notification(
+    request: Request,
     data: NotificationCreate,
     user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
-    notif = Notification(
-        user_id=user_id,
-        type=data.type,
-        title=data.title,
-        names=data.names
-    )
+    notif = Notification(user_id=user_id, type=data.type, title=data.title, names=data.names)
     db.add(notif)
     await db.commit()
     await db.refresh(notif)
@@ -59,6 +57,7 @@ async def create_notification(
 
 @router.put("/mark-all-read")
 async def mark_all_read(
+    request: Request,
     user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):

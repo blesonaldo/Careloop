@@ -1,45 +1,42 @@
 from pydantic import BaseModel, EmailStr
-from datetime import datetime
 from typing import Optional
+from datetime import datetime
 
-class UserBase(BaseModel):
+class UserCreate(BaseModel):
     email: EmailStr
-    full_name: str
-    business_name: Optional[str] = None
-    phone: Optional[str] = None
-
-class UserCreate(UserBase):
-    password: Optional[str] = None
-
-class UserUpdate(BaseModel):
+    password: str
     full_name: Optional[str] = None
     business_name: Optional[str] = None
-    phone: Optional[str] = None
-    is_active: Optional[bool] = None
 
-class UserResponse(UserBase):
+class UserCreateResponse(BaseModel):
     id: int
-    is_active: bool
-    created_at: datetime
-    updated_at: Optional[datetime] = None
-    last_login_at: Optional[datetime] = None   
-
-    class Config:
-        from_attributes = True
+    email: EmailStr
+    full_name: Optional[str] = None
+    business_name: Optional[str] = None
+    is_active: bool = True
+    is_email_verified: bool = False
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-class UserCreateResponse(BaseModel):
-    message: str
-    user: UserResponse
-    verification_token: Optional[str] = None
-
 class Token(BaseModel):
     access_token: str
     token_type: str
-    user: Optional[UserResponse] = None
+
+class UserResponse(BaseModel):
+    id: int
+    email: EmailStr
+    full_name: Optional[str] = None
+    business_name: Optional[str] = None
+    avatar: Optional[str] = None
+    is_active: bool = True
+    is_email_verified: bool = False
+    created_at: Optional[datetime] = None
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    business_name: Optional[str] = None
 
 class EmailVerificationRequest(BaseModel):
     email: EmailStr
@@ -67,7 +64,6 @@ class ChangePasswordRequest(BaseModel):
 class ChangePasswordResponse(BaseModel):
     message: str
 
-# NEW: For setting initial password after email verification
 class SetInitialPasswordRequest(BaseModel):
     token: str
     password: str
