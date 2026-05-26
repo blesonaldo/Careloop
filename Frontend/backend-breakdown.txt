@@ -145,3 +145,10 @@ SCALABILITY FEATURES
 - Horizontal scaling support
 
 This backend architecture ensures reliable user registration, secure data handling, and effective email communication through SendGrid, providing a complete solution for the Careloop signup process.
+
+//////////////////////////////////////ADDITIONAL FEATURES\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+Hash email verification tokens (currently plain text in DB)
+Audit logging for update operations
+Periodic cleanup job for expired revoked tokens
+Wire logout button into mobile sidebar close behavior

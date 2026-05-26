@@ -26,14 +26,14 @@ class EmailService:
         else:
             logger.info("SendGrid API key loaded successfully")
     
-    async def send_verification_email(self, email: str, token: str) -> bool:
+    async def send_verification_email(self, email: str, token: str, base_url: str = "http://localhost:8001") -> bool:
         """Send email verification email"""
         try:
             message = Mail(
                 from_email=Email(self.from_email, self.from_name),
                 to_emails=To(email),
                 subject="Verify your Careloop account",
-                html_content=self._get_verification_email_template(token)
+                html_content=self._get_verification_email_template(token, base_url)
             )
             
             sg = SendGridAPIClient(self.api_key)
@@ -50,14 +50,14 @@ class EmailService:
             logger.error(f"Error sending verification email: {str(e)}")
             return False
     
-    async def send_password_reset_email(self, email: str, token: str) -> bool:
+    async def send_password_reset_email(self, email: str, token: str, base_url: str = "http://localhost:8001") -> bool:
         """Send password reset email"""
         try:
             message = Mail(
                 from_email=Email(self.from_email, self.from_name),
                 to_emails=To(email),
                 subject="Reset your Careloop password",
-                html_content=self._get_password_reset_email_template(token)
+                html_content=self._get_password_reset_email_template(token, base_url)
             )
             
             sg = SendGridAPIClient(self.api_key)
@@ -98,9 +98,9 @@ class EmailService:
             logger.error(f"Error sending welcome email: {str(e)}")
             return False
     
-    def _get_verification_email_template(self, token: str) -> str:
+    def _get_verification_email_template(self, token: str, base_url: str = "http://localhost:8001") -> str:
         """Get HTML template for verification email"""
-        verification_url = f"http://localhost:8001/verify-email?token={token}"
+        verification_url = f"{base_url}/verify-email?token={token}"
         return f"""
         <!DOCTYPE html>
         <html>
@@ -155,9 +155,9 @@ class EmailService:
         </html>
         """
     
-    def _get_password_reset_email_template(self, token: str) -> str:
+    def _get_password_reset_email_template(self, token: str, base_url: str = "http://localhost:8001") -> str:
         """Get HTML template for password reset email"""
-        reset_url = f"http://localhost:8001/reset-password?token={token}"
+        reset_url = f"{base_url}/reset-password?token={token}"
         return f"""
         <!DOCTYPE html>
         <html>

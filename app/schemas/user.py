@@ -4,17 +4,15 @@ from datetime import datetime
 
 class UserCreate(BaseModel):
     email: EmailStr
-    password: str
+    password: Optional[str] = None
     full_name: Optional[str] = None
     business_name: Optional[str] = None
+    phone_number: Optional[str] = None
 
 class UserCreateResponse(BaseModel):
-    id: int
-    email: EmailStr
-    full_name: Optional[str] = None
-    business_name: Optional[str] = None
-    is_active: bool = True
-    is_email_verified: bool = False
+    message: str
+    user: Optional[object] = None
+    verification_token: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr

@@ -24,7 +24,8 @@ async def signup(
     user_data: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    return await AuthController.create_user(db, user_data)
+    base_url = str(request.base_url).rstrip("/")
+    return await AuthController.create_user(db, user_data, base_url)
 
 @router.post("/login", response_model=Token)
 async def login(
@@ -59,7 +60,8 @@ async def forgot_password(
     body: ForgotPasswordRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    return await AuthController.forgot_password(db, body)
+    base_url = str(request.base_url).rstrip("/")
+    return await AuthController.forgot_password(db, body, base_url)
 
 @router.post("/reset-password", response_model=ResetPasswordResponse)
 async def reset_password(

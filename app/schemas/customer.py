@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -10,14 +10,15 @@ class CustomerType(str, Enum):
 class CustomerCreate(BaseModel):
     name: str
     phone_number: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
+    date_of_birth: Optional[datetime] = None
     customer_type: Optional[CustomerType] = CustomerType.new
     has_purchased: Optional[bool] = False
 
 class CustomerUpdate(BaseModel):
     name: Optional[str] = None
     phone_number: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     customer_type: Optional[CustomerType] = None
     has_purchased: Optional[bool] = None
     last_contact: Optional[datetime] = None
@@ -28,7 +29,7 @@ class CustomerResponse(BaseModel):
     id: int
     name: str
     phone_number: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     customer_type: CustomerType = CustomerType.new
     has_purchased: bool = False
     last_contact: Optional[datetime] = None

@@ -15,23 +15,21 @@ class CustomerController:
     async def create_customer(db: AsyncSession, customer_data: CustomerCreate, user_id: int) -> Customer:
         """Create a new customer for the authenticated user"""
         # Check if customer with same email or phone already exists for this user
-        existing_customer = await CustomerController._get_customer_by_email_or_phone(
-            db, customer_data.email, customer_data.phone_number, user_id
-        )
-        
-        if existing_customer:
-            if existing_customer.email == customer_data.email:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Customer with this email already exists"
-                )
-            elif existing_customer.phone_number == customer_data.phone_number:
+        if customer_data.phone_number:
+            existing_phone = await CustomerController._get_customer_by_phone(db, customer_data.phone_number, user_id)
+            if existing_phone:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Customer with this phone number already exists"
                 )
-        
-        # Create new customer
+        if customer_data.email:
+            existing_email = await CustomerController._get_customer_by_email(db, customer_data.email, user_id)
+            if existing_email:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Customer with this email already exists"
+                )
+                # Create new customer
         db_customer = Customer(
             name=customer_data.name,
             phone_number=customer_data.phone_number,

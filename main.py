@@ -65,12 +65,20 @@ async def verify_email(token: str, db: AsyncSession = Depends(get_db)):
 main_router = APIRouter()
 
 @main_router.get("/", response_class=HTMLResponse)
+async def serve_landing():
+    try:
+        with open("Frontend/careloop-landing.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(content="<h1>Landing page not found</h1>", status_code=404)
+
+@main_router.get("/signup", response_class=HTMLResponse)
 async def serve_signup():
     try:
         with open("Frontend/careloop-signup.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
     except FileNotFoundError:
-        return HTMLResponse(content="<h1>Careloop</h1><p>Signup page not found</p>", status_code=404)
+        return HTMLResponse(content="<h1>Signup page not found</h1>", status_code=404)
 
 @main_router.get("/login", response_class=HTMLResponse)
 async def serve_login_page():
@@ -280,6 +288,9 @@ async def get_users():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
+
+
+
 
 
 

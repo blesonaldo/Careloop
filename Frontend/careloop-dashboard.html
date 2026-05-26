@@ -752,8 +752,9 @@ body.dark-mode.eye-care {
 .field-input:focus{border-color:var(--blue);}
 .phone-row{display:flex;gap:0;border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;transition:border-color .15s;}
 .phone-row:focus-within{border-color:var(--blue);}
-.phone-flag{display:flex;align-items:center;gap:6px;padding:12px 14px;border-right:1px solid var(--border);background:var(--bg2);font-size:.85rem;cursor:pointer;white-space:nowrap;}
-.phone-code{padding:12px 8px;font-size:.85rem;color:var(--text2);background:var(--bg2);border-right:1px solid var(--border);}
+.phone-flag{display:flex;align-items:center;background:var(--bg2);border-right:1.5px solid var(--border);}
+.phone-flag select{border:none;outline:none;background:transparent;font-size:.85rem;cursor:pointer;padding:13px 10px 13px 14px;color:var(--text);font-family:"DM Sans",sans-serif;font-weight:400;min-width:145px;}
+.phone-flag select:focus{outline:none;}
 .phone-input{flex:1;border:none;outline:none;padding:12px 14px;font-size:.9rem;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);}
 
 /* Radio options */
@@ -1333,7 +1334,7 @@ function showPage(page){
   if(navMap[page]) document.getElementById(navMap[page]).classList.add('active');
   if(page==='add-customer') renderAddStep();
   if(page==='notifications') renderNotifPage();
-  if(page==='customers') renderCustomers();
+  if(page==='customers'){loadCustomers().then(()=>renderCustomers());}
   if(page==='dashboard') renderDashboard();
   if(page==='sales') renderSalesPage();
 }
@@ -1845,8 +1846,25 @@ function renderAddStep(){
       <input class="field-input" id="add-name" type="text" placeholder="Enter customer name" oninput="checkStep1()">
       <label class="field-label">Phone Number</label>
       <div class="phone-row">
-        <div class="phone-flag">🇳🇬 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="phone-code">+234</div>
+        <div class="phone-flag">
+          <select id="add-dialcode" onchange="addFlowData.dialCode=this.value">
+            <option value="+234">Nigeria (+234)</option>
+            <option value="+1">USA (+1)</option>
+            <option value="+44">UK (+44)</option>
+            <option value="+233">Ghana (+233)</option>
+            <option value="+254">Kenya (+254)</option>
+            <option value="+27">S. Africa (+27)</option>
+            <option value="+91">India (+91)</option>
+            <option value="+49">Germany (+49)</option>
+            <option value="+33">France (+33)</option>
+            <option value="+55">Brazil (+55)</option>
+            <option value="+971">UAE (+971)</option>
+            <option value="+20">Egypt (+20)</option>
+            <option value="+212">Morocco (+212)</option>
+            <option value="+225">Ivory Coast (+225)</option>
+            <option value="+221">Senegal (+221)</option>
+          </select>
+        </div>
         <input class="phone-input" id="add-phone" type="tel" placeholder="----- ---- ----" oninput="checkStep1()">
       </div>
       <button class="btn-continue" id="step1-btn" onclick="goStep2()">Continue</button>
@@ -1899,15 +1917,15 @@ async function goStep3(){
   const token=localStorage.getItem('authToken');
   const body={
     name:addFlowData.name,
-    phone_number:'+234'+addFlowData.phone.replace(/\D/g,''),
-    email:addFlowData.email||addFlowData.name.replace(/\s/g,'.').toLowerCase()+'@customer.local',
+    phone_number:(addFlowData.dialCode||'+234')+addFlowData.phone.replace(/\D/g,''),
+    email:addFlowData.email||null,
     customer_type:addFlowData.purchased?'active':'new',
     has_purchased:addFlowData.purchased
   };
   try{
     const r=await fetch('/api/customers',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(body)});
     if(r.ok){
-      const nc=await r.json();customers.push(nc);
+      const nc=await r.json();customers.push(nc);renderCustomers();
       localStorage.setItem('cl_customers',JSON.stringify(customers));
     }
   }catch(e){}

@@ -461,7 +461,7 @@
 
         <!-- Heading -->
         <h1>Never lose track of your customers again</h1>
-        <p class="subtext">Careloop helps you remember, follow up, and stay consistentâwithout stress.</p>
+        <p class="subtext">Careloop helps you remember, follow up, and stay consistent without stress.</p>
 
         <!-- Form -->
         <form id="signup-form">
@@ -728,10 +728,10 @@
             
             try {
                 console.log('Making API call to backend...');
-                console.log('Form data:', { fullName, businessName, email, phone: dialCode + phone });
+                console.log('Form data:', { fullName, businessName, email, phone_number: dialCode + phone });
                 
                 // Send data to backend API
-                const response = await fetch('http://localhost:8001/api/auth/signup', {
+                const response = await fetch('/api/auth/signup', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -740,7 +740,7 @@
                         full_name: fullName,
                         business_name: businessName,
                         email,
-                        phone: dialCode + phone
+                        phone_number: dialCode + phone
                     })
                 });
                 
@@ -827,3 +827,45 @@
     </script>
 </body>
 </html>
+
+<script>(function(){var d=localStorage.getItem('cl_dark')==='1';var e=localStorage.getItem('cl_eye')==='1';if(d)document.documentElement.classList.add('dark');if(e)document.documentElement.classList.add('eyecare');})();</script>
+<style>
+        html.dark body{background:#0f1117!important;color:#f3f4f6!important}
+        html.dark h1{color:#f3f4f6!important}
+        html.dark label{color:#d1d5db!important}
+        html.dark input{background:#1a1f2e!important;border-color:#374151!important;color:#f3f4f6!important}
+        html.dark .subtext{color:#9ca3af!important}
+        html.dark .login-link{color:#9ca3af!important}
+        html.dark .login-link a{color:#818cf8!important}
+        html.dark .phone-field-container{background:#1a1f2e!important;border-color:#374151!important}
+        html.dark .country-selector{color:#f3f4f6!important;background:#1a1f2e!important}
+        html.dark .country-dial-code{color:#f3f4f6!important}
+        html.dark .country-dropdown{background:#1a1f2e!important;border-color:#374151!important}
+        html.dark .search-bar{background:#1a1f2e!important;border-color:#374151!important}
+        html.dark .search-input{background:#0f1117!important;border-color:#374151!important;color:#f3f4f6!important}
+        html.dark .country-item{border-color:#374151!important}
+        html.dark .country-item:hover{background:#2d3748!important}
+        html.dark .country-item-name{color:#f3f4f6!important}
+        html.dark .country-item-dial{color:#9ca3af!important}
+        html.eyecare body{background:#f5f0e8!important;color:#2d2a24!important}
+        html.eyecare h1{color:#2d2a24!important}
+        html.eyecare label{color:#4a4035!important}
+        html.eyecare input{background:#faf7f0!important;border-color:#ddd5c0!important;color:#2d2a24!important}
+        html.eyecare .subtext{color:#6b6456!important}
+        html.eyecare .login-link a{color:#7c6f3e!important}
+        html.eyecare .phone-field-container{background:#faf7f0!important;border-color:#ddd5c0!important}
+        html.eyecare .country-selector{color:#2d2a24!important}
+        html.eyecare .country-dial-code{color:#2d2a24!important}
+        html.dark.eyecare body{background:#1a1500!important;color:#f0e6c8!important}
+        html.dark.eyecare h1{color:#f0e6c8!important}
+        html.dark.eyecare label{color:#c8b46a!important}
+        html.dark.eyecare input{background:#221e0e!important;border-color:#2e2a1a!important;color:#f0e6c8!important}
+        html.dark.eyecare .subtext{color:#b5a47a!important}
+        html.dark.eyecare .login-link a{color:#c8a84b!important}
+        html.dark.eyecare .phone-field-container{background:#221e0e!important;border-color:#2e2a1a!important}
+        html.dark.eyecare .country-selector{color:#f0e6c8!important;background:#221e0e!important}
+        html.dark.eyecare .country-dial-code{color:#f0e6c8!important}
+        html.dark.eyecare .country-dropdown{background:#221e0e!important;border-color:#2e2a1a!important}
+        html.dark.eyecare .search-input{background:#1a1500!important;border-color:#2e2a1a!important;color:#f0e6c8!important}
+        html.dark.eyecare .country-item-name{color:#f0e6c8!important}
+</style>

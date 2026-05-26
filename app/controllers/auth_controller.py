@@ -27,7 +27,8 @@ class AuthController:
     @staticmethod
     async def create_user(
         db: AsyncSession,
-        user_data: UserCreate
+        user_data: UserCreate,
+        base_url: str = "http://localhost:8001"
     ) -> UserCreateResponse:
         try:
             existing_user = await AuthController._get_user_by_email(db, user_data.email)
@@ -50,7 +51,7 @@ class AuthController:
                 email=user_data.email,
                 full_name=user_data.full_name,
                 business_name=user_data.business_name,
-                phone=user_data.phone,
+                phone=user_data.phone_number,
                 hashed_password=hashed_password,
                 is_email_verified=False,
                 is_active=True
@@ -68,7 +69,8 @@ class AuthController:
             await db.commit()
 
             try:
-                await email_service.send_verification_email(user_data.email, verification_token)
+                print(f"DEBUG signup base_url: {base_url}")
+                await email_service.send_verification_email(user_data.email, verification_token, base_url)
             except Exception as e:
                 print(f"Failed to send verification email: {e}")
                 print(f"Verification token for manual testing: {verification_token}")
@@ -194,7 +196,7 @@ class AuthController:
         return {"message": "Email verified successfully"}
 
     @staticmethod
-    async def forgot_password(db: AsyncSession, request: ForgotPasswordRequest) -> ForgotPasswordResponse:
+    async def forgot_password(db: AsyncSession, request: ForgotPasswordRequest, base_url: str = "http://localhost:8001") -> ForgotPasswordResponse:
         user = await AuthController._get_user_by_email(db, request.email)
         if not user:
             return ForgotPasswordResponse(
@@ -208,7 +210,8 @@ class AuthController:
         user.password_reset_expires_at = reset_expires
         await db.commit()
 
-        reset_link = f"http://localhost:8001/reset-password?token={reset_token}"
+        print(f"DEBUG forgot_password base_url: {base_url}")
+        reset_link = f"{base_url}/reset-password?token={reset_token}"
         await email_service.send_password_reset_email(user.email, reset_token, reset_link)
 
         return ForgotPasswordResponse(

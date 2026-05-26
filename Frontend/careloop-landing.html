@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careloop: Relationship management made simple.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff; --text: #111827; --text-muted: #6b7280;
+            --text-light: #9ca3af; --border: #e5e7eb; --card-bg: #ffffff;
+            --nav-bg: rgba(255,255,255,0.92); --badge-bg: #eef0fb;
+            --badge-text: #3c4fe0; --feature-bg: #eef0fb;
+            --accent: #3c4fe0; --accent-hover: #2f3fcc;
+        }
+        html.dark {
+            --bg: #0f1117; --text: #f3f4f6; --text-muted: #9ca3af;
+            --text-light: #6b7280; --border: #1f2937; --card-bg: #1a1f2e;
+            --nav-bg: rgba(15,17,23,0.92); --badge-bg: #1e2340;
+            --badge-text: #818cf8; --feature-bg: #1a1f2e;
+            --accent: #4f63f0; --accent-hover: #3c4fe0;
+        }
+        html.eyecare {
+            --bg: #f5f0e8; --text: #2d2a24; --text-muted: #6b6456;
+            --text-light: #9c8f7e; --border: #ddd5c0; --card-bg: #faf7f0;
+            --nav-bg: rgba(245,240,232,0.92); --badge-bg: #ede5d4;
+            --badge-text: #7c6f3e; --feature-bg: #ede5d4;
+            --accent: #7c6f3e; --accent-hover: #635832;
+        }
+        html.dark.eyecare {
+            --bg: #1a1500; --text: #f0e6c8; --text-muted: #b5a47a;
+            --text-light: #7a6a45; --border: #2e2a1a; --card-bg: #221e0e;
+            --nav-bg: rgba(26,21,0,0.92); --badge-bg: #2a2510;
+            --badge-text: #c8b46a; --feature-bg: #221e0e;
+            --accent: #c8a84b; --accent-hover: #a88a35;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; }
+
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: var(--nav-bg); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 48px; height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .nav-logo img { height: 34px; }
+        #mobile-controls { display: none; }
+        .nav-links { display: flex; align-items: center; gap: 32px; }
+        .nav-links a { font-size: 14px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        .btn-try { background: var(--accent); color: #fff; padding: 10px 22px; border-radius: 50px; font-size: 14px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: background 0.2s, transform 0.1s; display: inline-block; }
+        .btn-try:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .mode-toggle { width:38px; height:38px; border-radius:50%; border:1.5px solid var(--border); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text-muted); transition:border-color 0.2s,color 0.2s,background 0.2s; }
+        .mode-toggle:hover { border-color:var(--accent); color:var(--accent); }
+        .mode-toggle.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+        .hero { padding: 140px 24px 100px; text-align: center; max-width: 760px; margin: 0 auto; }
+        .badge { display: inline-block; background: var(--badge-bg); color: var(--badge-text); font-size: 13px; font-weight: 500; padding: 6px 16px; border-radius: 50px; margin-bottom: 28px; }
+        .hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 24px; letter-spacing: -0.02em; }
+        .hero p { font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 36px; max-width: 580px; margin-left: auto; margin-right: auto; }
+        .hero-btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 56px; }
+        .btn-outline { padding: 13px 28px; border-radius: 50px; border: 1.5px solid var(--border); font-size: 15px; font-weight: 500; color: var(--text); text-decoration: none; background: transparent; transition: border-color 0.2s, color 0.2s; }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-primary { padding: 13px 28px; border-radius: 50px; background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: background 0.2s, transform 0.1s; display: inline-block; }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .hero-dash { border-radius: 16px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.08); max-width: 900px; margin: 0 auto; background: var(--feature-bg); padding: 48px; transition: background 0.3s, border-color 0.3s; }
+        .dash-mockup { background: var(--card-bg); border-radius: 12px; padding: 32px; border: 1px solid var(--border); transition: background 0.3s, border-color 0.3s; }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .dash-title { font-size: 1.4rem; font-weight: 700; color: var(--text); }
+        .dash-subtitle { font-size: 13px; color: var(--accent); font-weight: 500; }
+        .dash-actions { display: flex; gap: 10px; }
+        .dash-btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: default; }
+        .dash-btn-primary { background: var(--accent); color: #fff; }
+        .dash-btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+        .dash-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: var(--feature-bg); border-radius: 10px; padding: 20px; transition: background 0.3s; }
+        .stat-label { font-size: 12px; color: var(--text-light); margin-bottom: 8px; }
+        .stat-val { font-size: 1.8rem; font-weight: 700; color: var(--text); }
+        .stat-tag { font-size: 11px; color: #22c55e; font-weight: 500; margin-top: 4px; }
+        .dash-tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+        .dash-tab { font-size: 13px; font-weight: 500; color: var(--text-light); padding-bottom: 10px; cursor: default; }
+        .dash-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+        section { padding: 100px 24px; }
+        .section-inner { max-width: 860px; margin: 0 auto; }
+        .section-title { font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 700; line-height: 1.2; color: var(--text); letter-spacing: -0.02em; }
+        .section-body { font-size: 1rem; color: var(--text-muted); line-height: 1.75; margin-top: 20px; }
+
+        .problem { text-align: center; }
+        .problem .section-title { max-width: 680px; margin: 0 auto; }
+        .problem .section-body { max-width: 640px; margin: 20px auto 0; }
+        .problem .section-body p { margin-bottom: 20px; }
+        .problem .section-body p:last-child { margin-bottom: 0; }
+
+        .features-header { text-align: center; margin-bottom: 56px; }
+        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .feature-card { background: var(--feature-bg); border-radius: 16px; padding: 32px; transition: background 0.3s; }
+        .feature-card.full { grid-column: 1 / -1; }
+        .feature-card h3 { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+        .feature-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+
+        .how { text-align: center; }
+        .steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 48px; margin-top: 64px; }
+        .step-num { font-size: 3rem; font-weight: 700; color: var(--accent); margin-bottom: 20px; }
+        .step h3 { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+        .step p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+
+        .faq { text-align: center; }
+        .faq-list { text-align: left; max-width: 720px; margin: 48px auto 0; }
+        .faq-item { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; transition: border-color 0.2s, background 0.3s; }
+        .faq-item.open { border-color: var(--accent); }
+        .faq-q { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px; cursor: pointer; font-size: 0.97rem; font-weight: 500; color: var(--text); background: var(--card-bg); transition: background 0.2s; user-select: none; }
+        .faq-q:hover { background: var(--feature-bg); }
+        .faq-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; transition: background 0.2s; }
+        .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; background: var(--card-bg); }
+        .faq-item.open .faq-a { max-height: 300px; }
+        .faq-a-inner { padding: 0 24px 22px; font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
+
+        .cta { text-align: center; }
+        .cta .section-title { max-width: 600px; margin: 0 auto 20px; }
+        .cta .section-body { max-width: 520px; margin: 0 auto 36px; }
+
+        footer { border-top: 1px solid var(--border); padding: 64px 48px 40px; transition: border-color 0.3s; }
+        .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; }
+        .footer-brand p { font-size: 1.2rem; font-weight: 700; color: var(--text); line-height: 1.4; }
+        .footer-cols { display: flex; gap: 80px; }
+        .footer-col h4 { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); margin-bottom: 20px; }
+        .footer-col a { display: block; font-size: 14px; color: var(--text); text-decoration: none; margin-bottom: 14px; transition: color 0.2s; }
+        .footer-col a:hover { color: var(--accent); }
+        .footer-bottom { max-width: 1100px; margin: 48px auto 0; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-light); }
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 20px;
+                height: 56px;
+            }
+            .nav-links { display: none !important; }
+            .nav-right { display: none !important; }
+
+            .hamburger {
+                display: flex !important;
+                flex-direction: column;
+                gap: 5px;
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 4px;
+                margin-left: auto;
+            }
+            .hamburger span {
+                display: block;
+                width: 22px;
+                height: 2px;
+                background: var(--text);
+                border-radius: 2px;
+                transition: all 0.3s;
+            }
+
+            .mobile-nav {
+                display: none;
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: var(--nav-bg);
+                backdrop-filter: blur(12px);
+                border-bottom: 1px solid var(--border);
+                padding: 16px 20px 24px;
+                z-index: 99;
+                flex-direction: column;
+                gap: 0;
+            }
+            .mobile-nav.open { display: flex; }
+            .mobile-nav a {
+                font-size: 15px;
+                font-weight: 500;
+                color: var(--text);
+                text-decoration: none;
+                padding: 14px 0;
+                border-bottom: 1px solid var(--border);
+            }
+            .mobile-nav a:last-child { border-bottom: none; }
+
+            .hero {
+                padding: 100px 20px 60px;
+            }
+            .hero h1 { font-size: 2rem; }
+            .hero > p { font-size: 0.95rem; }
+            .hero-btns {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 40px;
+            }
+            .btn-outline, .btn-primary {
+                width: 100%;
+                max-width: 320px;
+                text-align: center;
+                padding: 14px 20px;
+            }
+            .hero-dash { padding: 20px; }
+            .dash-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .dash-actions { flex-direction: column; gap: 8px; }
+            .dash-btn { width: 100%; text-align: center; }
+
+            section { padding: 60px 20px; }
+
+            .features-grid { grid-template-columns: 1fr; }
+            .feature-card.full { grid-column: 1; }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .faq-list { margin-top: 32px; }
+
+            .cta .btn-primary {
+                width: 100%;
+                max-width: 320px;
+                padding: 15px 20px;
+            }
+
+            footer {
+                padding: 48px 20px 32px;
+            }
+            .footer-inner {
+                flex-direction: column;
+                gap: 40px;
+            }
+            .footer-brand p { font-size: 1.1rem; }
+            .footer-cols {
+                flex-direction: column;
+                gap: 32px;
+            }
+            .footer-bottom { margin-top: 32px; }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 1.75rem; }
+            .dash-stats { grid-template-columns: 1fr; }
+            .dash-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .dash-tabs { overflow-x: auto; white-space: nowrap; flex-wrap: nowrap; }
+            .dash-tab { flex-shrink: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-logo"><img src="assets/primary_logo.jpg" alt="Careloop"></div>
+    <div id="mobile-controls" style="display:none;align-items:center;gap:8px;margin-left:auto;">
+        <button onclick="document.getElementById('darkModeToggle').click()" class="mode-toggle" title="Toggle Dark Mode">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button onclick="document.getElementById('eyeCareToggle').click()" class="mode-toggle" title="Toggle Eye Care Mode">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 4.5C5 4.5 1 12 1 12s4 7.5 11 7.5 11-7.5 11-7.5-4-7.5-11-7.5zM12 16c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/><circle cx="12" cy="12" r="2.5"/></svg>
+        </button>
+        <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+    <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQs</a>
+    </div>
+    <div class="nav-right">
+        <button id="darkModeToggle" class="mode-toggle" title="Toggle Dark Mode">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+        </button>
+        <button id="eyeCareToggle" class="mode-toggle" title="Toggle Eye Care Mode">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path d="M12 4.5C5 4.5 1 12 1 12s4 7.5 11 7.5 11-7.5 11-7.5-4-7.5-11-7.5zM12 16c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/>
+                <circle cx="12" cy="12" r="2.5"/>
+            </svg>
+        </button>
+        <a href="/signup" class="btn-try">Try Careloop</a>
+    </div>
+</nav>
+<div class="mobile-nav" id="mobile-nav">
+    <a href="#about" onclick="closeMenu()">About</a>
+    <a href="#features" onclick="closeMenu()">Features</a>
+    <a href="#faq" onclick="closeMenu()">FAQs</a>
+    <a href="/signup" onclick="closeMenu()">Try Careloop</a>
+</div>
+
+<section style="padding: 0;">
+  <div class="hero" style="padding-bottom: 0; overflow: hidden;">
+
+    <div class="badge">Simple follow-ups. Better customer retention.</div>
+    <h1>Build stronger customer relationships without overthinking it.</h1>
+    <p>Careloop helps small business owners track customers, record purchases, and get smart follow-up reminders—without feeling spammy or overwhelming.</p>
+    <div class="hero-btns">
+      <a href="#how" class="btn-outline">How it works</a>
+      <a href="/signup" class="btn-primary">Get Started</a>
+    </div>
+
+    <img 
+  src="./assets/Image.jpg"
+  style="
+    width: 100%;
+    display: block;
+    height: 300px;
+    object-fit: cover;
+    object-position: center top;
+  "
+/>
+</section>
+
+
+<section class="problem" id="about">
+    <div class="section-inner">
+        <div class="badge">Problem Statement</div>
+        <h2 class="section-title">Customer relationships fade when follow-ups are forgotten.</h2>
+        <div class="section-body">
+            <p>Most small business owners don't intentionally ignore customers — they're just genuinely busy.</p>
+            <p>Careloop helps you remember who to check in with, when to follow up, and how to stay consistent without overwhelming your customers.</p>
+        </div>
+    </div>
+</section>
+
+<section id="features">
+    <div class="section-inner" style="max-width:960px;">
+        <div class="features-header">
+            <div class="badge">Features</div>
+            <h2 class="section-title">Everything you need to stay connected</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>Smart Follow-Ups</h3>
+                <p>Careloop automatically suggests the right time to reconnect with customers based on their activity and purchase history.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Customer Tracking</h3>
+                <p>Store customer information, purchase history, and relationship activity in one simple place.</p>
+            </div>
+            <div class="feature-card full">
+                <h3>Quick Actions</h3>
+                <p>Send messages, record sales, snooze reminders, or mark follow-ups as done—without switching tools.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="how" id="how">
+    <div class="section-inner">
+        <div class="badge">How it works</div>
+        <h2 class="section-title">How Careloop works</h2>
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h3>Add your customers</h3>
+                <p>Start with a few customers and give Careloop context about their relationship with your business.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h3>Get follow-up suggestions</h3>
+                <p>Careloop automatically organizes upcoming, pending, and overdue follow-ups for you.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h3>Stay consistent</h3>
+                <p>Send messages, record purchases, and build stronger customer relationships over time.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="faq" id="faq">
+    <div class="section-inner">
+        <div class="badge">How it works</div>
+        <h2 class="section-title">Everything you need to know about Careloop</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">What is Careloop?<span class="faq-icon">+</span></div>
+                <div class="faq-a"><div class="faq-a-inner">Careloop is a customer relationship management tool designed to help small business owners remember follow-ups, track customer activity, and maintain better relationships over time.</div></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">How does Careloop work?<span class="faq-icon">+</span></div>
+                <div class="faq-a"><div class="faq-a-inner">Careloop helps you add customers, track purchases, and receive smart follow-up suggestions based on customer activity. It keeps your follow-ups organized so you always know who to reconnect with next.</div></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">Will Careloop send messages automatically?<span class="faq-icon">+</span></div>
+                <div class="faq-a"><div class="faq-a-inner">No. Careloop focuses on intentional relationship management. It suggests the right time to follow up, while you stay in control of when and how messages are sent.</div></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">Can I track returning customers?<span class="faq-icon">+</span></div>
+                <div class="faq-a"><div class="faq-a-inner">Yes. Careloop allows you to record purchases and monitor customer activity so you can better manage repeat customers and long-term relationships.</div></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">Is Careloop only for large businesses?<span class="faq-icon">+</span></div>
+                <div class="faq-a"><div class="faq-a-inner">Not at all. Careloop is built primarily for small business owners, freelancers, and growing teams who want a simple way to manage customer relationships without using a complicated CRM.</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="section-inner">
+        <h2 class="section-title">Start building stronger customer relationships today</h2>
+        <p class="section-body">Careloop helps you follow up consistently, stay organized, and keep customers engaged—without the stress.</p>
+        <a href="/signup" class="btn-primary" style="font-size:15px;padding:15px 36px;">Get Started</a>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand"><p>Careloop — Relationship management made simple.</p></div>
+        <div class="footer-cols">
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="#">Home</a>
+                <a href="#about">About</a>
+                <a href="#how">How it works</a>
+                <a href="#features">Features</a>
+            </div>
+            <!-- <div class="footer-col">
+                <h4>Connect</h4>
+                <a href="#">Book a call</a>
+                <a href="#">X</a>
+                <a href="#">Instagram</a>
+                <a href="#">LinkedIn</a>
+            </div> -->
+        </div>
+    </div>
+    <!-- <div class="footer-bottom">© 2026 Careloop. All rights reserved.</div> -->
+</footer>
+
+<script>
+    // Hamburger
+    function toggleMenu() {
+        document.getElementById('mobile-nav').classList.toggle('open');
+    }
+    function closeMenu() {
+        document.getElementById('mobile-nav').classList.remove('open');
+    }
+    function checkMobile() {
+        const mc = document.getElementById('mobile-controls');
+        const nr = document.querySelector('.nav-right');
+        const nl = document.querySelector('.nav-links');
+        if (window.innerWidth <= 768) {
+            mc.style.display = 'flex';
+            nr.style.display = 'none';
+            nl.style.display = 'none';
+        } else {
+            mc.style.display = 'none';
+            nr.style.display = 'flex';
+            nl.style.display = 'flex';
+            closeMenu();
+        }
+    }
+    window.addEventListener('resize', checkMobile);
+    document.addEventListener('DOMContentLoaded', checkMobile);
+    checkMobile();
+
+    const _root=document.documentElement;
+    const _darkBtn=document.getElementById('darkModeToggle');
+    const _eyeBtn=document.getElementById('eyeCareToggle');
+    // Remove duplicate desktop buttons from nav-right since they moved to mobile-controls
+
+    function applyTheme(dark, eye){
+        _root.classList.toggle('dark', dark);
+        _root.classList.toggle('eyecare', eye);
+        _darkBtn.classList.toggle('active', dark);
+        _eyeBtn.classList.toggle('active', eye);
+        localStorage.setItem('cl_dark', dark ? '1' : '0');
+        localStorage.setItem('cl_eye', eye ? '1' : '0');
+    }
+
+    // Load saved state
+    var _dark = localStorage.getItem('cl_dark') === '1';
+    var _eye  = localStorage.getItem('cl_eye')  === '1';
+    applyTheme(_dark, _eye);
+
+    _darkBtn.addEventListener('click', function(){
+        _dark = !_root.classList.contains('dark');
+        _eye  = _root.classList.contains('eyecare');
+        applyTheme(_dark, _eye);
+    });
+    _eyeBtn.addEventListener('click', function(){
+        _dark = _root.classList.contains('dark');
+        _eye  = !_root.classList.contains('eyecare');
+        applyTheme(_dark, _eye);
+    });
+
+    function toggleFaq(el){
+        const item=el.closest('.faq-item');
+        const isOpen=item.classList.contains('open');
+        item.classList.toggle('open',!isOpen);
+        el.querySelector('.faq-icon').textContent=isOpen ? '+' : '−';
+    }
+</script>
+</body>
+</html>

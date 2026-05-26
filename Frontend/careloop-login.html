@@ -270,7 +270,7 @@
         /* Loading — same blue, animated dots */
         .submit-button.state-loading {
             background: #3c4fe0;
-            color: #ffffff;
+            color: #3c4fe0;
             cursor: not-allowed;
             pointer-events: none;
         }
@@ -294,15 +294,42 @@
 
         /* Sign up row */
         .signup-link {
-            text-align: center; font-size: 0.85rem; color: #374151;
+            text-align: center; font-size: 0.85rem; color: #111827; font-weight: 500;
         }
         .signup-link a {
-            color: #3c4fe0; font-weight: 600;
+            color: #3c4fe0; font-weight: 700;
             text-decoration: none; margin-left: 3px;
         }
         .signup-link a:hover { text-decoration: underline; }
+            html.dark body{background:#0f1117!important;color:#f3f4f6!important}
+        html.dark h1{color:#f3f4f6!important}
+        html.dark label{color:#d1d5db!important}
+        html.dark input{background:#1a1f2e!important;border-color:#374151!important;color:#f3f4f6!important}
+        html.dark .subtext{color:#9ca3af!important}
+        html.dark .signup-link{color:#9ca3af!important}
+        html.dark .signup-link a{color:#818cf8!important}
+        html.dark .forgot-password-link a{color:#818cf8!important}
+        html.dark .password-conditions{background:#1a1f2e!important;border-color:#374151!important;color:#f3f4f6!important}
+        html.dark .submit-button.state-active{background:#4f63f0!important}
+        html.eyecare body{background:#f5f0e8!important;color:#2d2a24!important}
+        html.eyecare h1{color:#2d2a24!important}
+        html.eyecare label{color:#4a4035!important}
+        html.eyecare input{background:#faf7f0!important;border-color:#ddd5c0!important;color:#2d2a24!important}
+        html.eyecare .subtext{color:#6b6456!important}
+        html.eyecare .forgot-password-link a{color:#7c6f3e!important}
+        html.eyecare .signup-link a{color:#7c6f3e!important}
+        html.eyecare .submit-button.state-active{background:#3c4fe0!important}
+        html.dark.eyecare body{background:#1a1500!important;color:#f0e6c8!important}
+        html.dark.eyecare h1{color:#f0e6c8!important}
+        html.dark.eyecare label{color:#c8b46a!important}
+        html.dark.eyecare input{background:#221e0e!important;border-color:#2e2a1a!important;color:#f0e6c8!important}
+        html.dark.eyecare .subtext{color:#b5a47a!important}
+        html.dark.eyecare .forgot-password-link a{color:#c8a84b!important}
+        html.dark.eyecare .signup-link a{color:#c8a84b!important}
+        html.dark.eyecare .submit-button.state-active{background:#3c4fe0!important}
     </style>
 </head>
+<script>(function(){var d=localStorage.getItem('cl_dark')==='1';var e=localStorage.getItem('cl_eye')==='1';if(d)document.documentElement.classList.add('dark');if(e)document.documentElement.classList.add('eyecare');})();</script>
 <body>
 <div class="container">
 

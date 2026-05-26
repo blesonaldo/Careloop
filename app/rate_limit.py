@@ -11,15 +11,5 @@ class RateLimitedRouter(APIRouter):
         super().__init__(**kwargs)
         self.default_limit = limit
 
-    def add_api_route(self, path, endpoint, **kwargs):
-        limit = self.default_limit
-
-        @functools.wraps(endpoint)
-        async def limited_endpoint(request: Request, *args, **kwargs):
-            await limiter.limit(limit)(endpoint)(request, *args, **kwargs)
-            return await endpoint(request, *args, **kwargs)
-
-        return super().add_api_route(path, limited_endpoint, **kwargs)
-
 def add_rate_limit_exception_handler(app):
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
