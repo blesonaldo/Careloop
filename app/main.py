@@ -284,7 +284,8 @@ async def get_users():
             return {"users": [{"id": u.id, "email": u.email, "is_verified": u.is_email_verified} for u in users]}
     except Exception as e:
         return {"error": str(e)}
-
+from fastapi import FastAPI
+app = FastAPI()
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
