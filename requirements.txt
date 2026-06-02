@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
@@ -13,3 +14,18 @@ starlette==1.1.0
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 uvicorn==0.48.0
+=======
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+sqlalchemy==2.0.23
+asyncpg==0.29.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+python-dotenv==1.0.0
+sendgrid==6.10.0
+openai==1.3.7
+email-validator
+PyJWT
+passlib[bcrypt]
+>>>>>>> 9a5ce5c285946be323459e5b3450f29e6bf3d5aa
