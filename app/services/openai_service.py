@@ -9,7 +9,7 @@ load_dotenv()
 class OpenAIService:
     """Service for generating AI-powered messages using OpenAI API"""
     
-
+import os
 class OpenAIService:
     def __init__(self):
         self.api_key = os.getenv("OPENAI_API_KEY")
