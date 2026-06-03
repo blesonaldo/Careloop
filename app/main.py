@@ -289,7 +289,12 @@ app = FastAPI()
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+api_key = os.getenv("OPENAI_API_KEY")
 
 
 
