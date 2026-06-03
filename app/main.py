@@ -296,7 +296,14 @@ load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
 
+import os
 
+class OpenAIService:
+    def __init__(self):
+        self.api_key = os.getenv("OPENAI_API_KEY")
+
+        if not self.api_key:
+            raise ValueError("OpenAI API key not found in environment variables")
 
 
 
