@@ -9,11 +9,16 @@ load_dotenv()
 class OpenAIService:
     """Service for generating AI-powered messages using OpenAI API"""
     
+
+class OpenAIService:
     def __init__(self):
-        self.api_key = os.getenv("OPEN_AI_API_KEY")
+        self.api_key = os.getenv("OPENAI_API_KEY")
+
         if not self.api_key:
             raise ValueError("OpenAI API key not found in environment variables")
         self.client = AsyncOpenAI(api_key=self.api_key)
+        import os
+
     
     async def generate_follow_up_message(
         self, 
