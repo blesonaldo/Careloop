@@ -40,7 +40,12 @@ async def catch_validation_errors(request: Request, call_next):
             status_code=422,
             content={"detail": e.errors()}
         )
-
+@app.get("/")
+async def root():
+    return {
+        "status": "ok",
+        "message": "Careloop backend is live "
+    }
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
