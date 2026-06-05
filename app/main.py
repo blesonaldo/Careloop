@@ -28,6 +28,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 # Add validation error middleware
 @app.middleware("http")
