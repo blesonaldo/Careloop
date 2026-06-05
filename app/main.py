@@ -36,8 +36,10 @@ async def catch_validation_errors(request: Request, call_next):
         response = await call_next(request)
         return response
     except ValidationError as e:
-        logging.error(f"Validation error for {request.url.path}: {e.errors()}")
-        return JSONResponse(status_code=422, content={"detail": e.errors()})
+        return JSONResponse(
+            status_code=422,
+            content={"detail": e.errors()}
+        )
 
 app.add_middleware(
     CORSMiddleware,
