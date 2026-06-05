@@ -1,0 +1,32 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+
+# Database
+sqlalchemy
+aiosqlite
+asyncpg
+
+# Auth / Security
+passlib[bcrypt]
+PyJWT
+python-jose[cryptography]
+bcrypt
+
+# Validation / schemas
+pydantic
+email-validator
+
+# Rate limiting
+slowapi
+limits
+
+# Email service (you are using SendGrid)
+sendgrid
+
+# External APIs
+openai
+
+# Utilities
+python-multipart
+requests
