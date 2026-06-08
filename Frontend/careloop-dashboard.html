@@ -1274,6 +1274,9 @@ body.dark-mode.eye-care {
 </div>
 
 <script>
+// ─── API CONFIG ───
+const API_URL = "https://careloop-production-0243.up.railway.app";
+
 // ─── STATE ───
 let customers = [];
 let followups = [];
@@ -1344,7 +1347,7 @@ async function init(){
   const token=localStorage.getItem('authToken');
   if(!token){window.location.href='careloop-login.html';return;}
   try{
-    const r=await fetch('/api/user/profile',{headers:{'Authorization':'Bearer '+token}});
+    const r=await fetch(`${API_URL}/api/user/profile`,{headers:{'Authorization':'Bearer '+token}});
     if(!r.ok) throw new Error();
     const u=await r.json();
     currentUser.name=u.full_name||u.fullName||u.name||'User';
@@ -1382,7 +1385,7 @@ updateUserUI();
 //     const token = localStorage.getItem('authToken');
 //     if (!token) return;
 //     try {
-//         const r = await fetch('/api/notifications', {
+//         const r = await fetch(`${API_URL}/api/notifications`, {
 //             headers: { 'Authorization': 'Bearer ' + token }
 //         });
 //         if (r.ok) notifications = await r.json();
@@ -1397,7 +1400,7 @@ updateUserUI();
 // async function addNotification(n) {
 //     const token = localStorage.getItem('authToken');
 //     try {
-//         const r = await fetch('/api/notifications', {
+//         const r = await fetch(`${API_URL}/api/notifications`, {
 //             method: 'POST',
 //             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
 //             body: JSON.stringify({ type: n.type, title: n.title, names: n.names })
@@ -1417,7 +1420,7 @@ updateUserUI();
 async function markAllRead() {
     const token = localStorage.getItem('authToken');
     try {
-        await fetch('/api/notifications/mark-all-read', {
+        await fetch(`${API_URL}/api/notifications/mark-all-read`, {
             method: 'PUT',
             headers: { 'Authorization': 'Bearer ' + token }
         });
@@ -1452,7 +1455,7 @@ function changeAvatar(){
       const b64=ev.target.result;
       const token=localStorage.getItem('authToken');
       try{
-        await fetch('/api/user/avatar',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({avatar:b64})});
+        await fetch(`${API_URL}/api/user/avatar`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({avatar:b64})});
         currentUser.avatar=b64; updateUserUI();
       }catch(e){alert('Failed to upload avatar.');}
     };
@@ -1466,7 +1469,7 @@ function changeAvatar(){
 async function loadSales(){
   const token=localStorage.getItem('authToken'); if(!token) return;
   try{
-    const r=await fetch('/api/sales',{headers:{'Authorization':'Bearer '+token}});
+    const r=await fetch(`${API_URL}/api/sales`,{headers:{'Authorization':'Bearer '+token}});
     if(r.ok){
       const d=await r.json();
       sales=d.items.map(s=>({...s,customerId:s.customer_id}));
@@ -1478,7 +1481,7 @@ async function loadSales(){
 async function loadPreferences(){
   const token=localStorage.getItem('authToken'); if(!token) return;
   try{
-    const r=await fetch('/api/user/profile',{headers:{'Authorization':'Bearer '+token}});
+    const r=await fetch(`${API_URL}/api/user/profile`,{headers:{'Authorization':'Bearer '+token}});
     if(r.ok){
       const u=await r.json();
       if(u.preferred_currency){
@@ -1495,7 +1498,7 @@ async function saveCurrencyPreference(currency){
   localStorage.setItem('cl_currency',currency);
   const token=localStorage.getItem('authToken');
   try{
-    await fetch('/api/sales/preferences',{
+    await fetch(`${API_URL}/api/sales/preferences`,{
       method:'PUT',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
       body:JSON.stringify({preferred_currency:currency})
@@ -1507,7 +1510,7 @@ async function saveCurrencyPreference(currency){
 async function loadCustomers(){
   const token=localStorage.getItem('authToken'); if(!token) return;
   try{
-    const r=await fetch('/api/customers?per_page=100',{headers:{'Authorization':'Bearer '+token}});
+    const r=await fetch(`${API_URL}/api/customers?per_page=100`,{headers:{'Authorization':'Bearer '+token}});
     if(r.ok){const d=await r.json();customers=d.items||[];}
     else if(r.status===401){window.location.href='careloop-login.html';}
   }catch(e){
@@ -1712,7 +1715,7 @@ async function openMessageModal(id){
   btn.disabled=true;
   try{
     const token=localStorage.getItem('authToken');
-    const r=await fetch('/api/messages/generate',{
+    const r=await fetch(`${API_URL}/api/messages/generate`,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
       body:JSON.stringify({customer_id:id,message_type:'follow_up'})
@@ -1750,7 +1753,7 @@ async function submitSale(){
   if(!custId||isNaN(amount)||amount<=0){alert('Please select a customer and enter a valid amount.');return;}
   const token=localStorage.getItem('authToken');
   try{
-    const r=await fetch('/api/sales',{
+    const r=await fetch(`${API_URL}/api/sales`,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
       body:JSON.stringify({customer_id:parseInt(custId),amount,currency,product:product||null})
@@ -1923,7 +1926,7 @@ async function goStep3(){
     has_purchased:addFlowData.purchased
   };
   try{
-    const r=await fetch('/api/customers',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(body)});
+    const r=await fetch(`${API_URL}/api/customers`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(body)});
     if(r.ok){
       const nc=await r.json();customers.push(nc);renderCustomers();
       localStorage.setItem('cl_customers',JSON.stringify(customers));
@@ -1943,7 +1946,7 @@ async function buildNotifications(){
   const token=localStorage.getItem('authToken');
   if(!token) return;
   try{
-    const r=await fetch('/api/notifications',{
+    const r=await fetch(`${API_URL}/api/notifications`,{
       headers:{'Authorization':'Bearer '+token}
     });
     if(r.ok){
@@ -1961,7 +1964,7 @@ async function buildNotifications(){
 async function addNotification(n){
   const token=localStorage.getItem('authToken');
   try{
-    const r=await fetch('/api/notifications',{
+    const r=await fetch(`${API_URL}/api/notifications`,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
       body:JSON.stringify({type:n.type,title:n.title,names:n.names})
@@ -2034,7 +2037,7 @@ function renderNotifPage(){
 async function markAllRead(){
   const token=localStorage.getItem('authToken');
   try{
-    await fetch('/api/notifications/mark-all-read',{
+    await fetch(`${API_URL}/api/notifications/mark-all-read`,{
       method:'PUT',
       headers:{'Authorization':'Bearer '+token}
     });
@@ -2458,7 +2461,7 @@ if (document.readyState === 'loading') {
 async function logout(){
   const token=localStorage.getItem('authToken');
   try{
-    await fetch('/api/auth/logout',{
+    await fetch(`${API_URL}/api/auth/logout`,{
       method:'POST',
       headers:{'Authorization':'Bearer '+token}
     });
