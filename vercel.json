@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/Frontend/careloop-landing.html" },
+    { "source": "/login", "destination": "/Frontend/careloop-login.html" },
+    { "source": "/signup", "destination": "/Frontend/careloop-signup.html" },
+    { "source": "/dashboard", "destination": "/Frontend/careloop-dashboard.html" },
+    { "source": "/forgot-password", "destination": "/Frontend/forgot-password.html" },
+    { "source": "/reset-password", "destination": "/Frontend/reset-password.html" },
+    { "source": "/create-password", "destination": "/Frontend/create-password.html" },
+    { "source": "/email-verified", "destination": "/Frontend/email-verified.html" },
+    { "source": "/signup-success", "destination": "/Frontend/signup-success.html" }
+  ]
+}
