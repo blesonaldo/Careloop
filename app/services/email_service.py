@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv
 import pathlib
-load_dotenv(dotenv_path=pathlib.Path(__file__).parent.parent.parent / ".env")
+import os as _os
+load_dotenv(dotenv_path=_os.path.join(_os.getcwd(), ".env"), override=True)
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -11,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 class EmailService:
     def __init__(self):
+        print(f"CWD: {os.getcwd()}")
+        print(f"ENV FILE EXISTS: {os.path.exists(os.path.join(os.getcwd(), '.env'))}")
+        print(f"GMAIL_USER RAW: {os.getenv('GMAIL_USER')}")
         self.gmail_user = os.getenv("GMAIL_USER")
         self.gmail_password = os.getenv("GMAIL_APP_PASSWORD")
         self.from_name = os.getenv("SENDGRID_FROM_NAME", "Careloop")
