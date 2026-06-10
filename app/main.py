@@ -20,6 +20,12 @@ from app.rate_limit import limiter, RateLimitedRouter, add_rate_limit_exception_
 
 logging.basicConfig(level=logging.DEBUG)
 
+import os
+
+print("=== ENV CHECK ===")
+print("GMAIL_USER:", os.getenv("GMAIL_USER"))
+print("ALL KEYS:", list(os.environ.keys())[:20])
+
 app = FastAPI(
     redirect_slashes=False,
     title="Careloop API",
