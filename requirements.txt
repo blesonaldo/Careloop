@@ -1,10 +1,32 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-sqlalchemy==2.0.23
-asyncpg==0.29.0
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
-python-dotenv==1.0.0
-sendgrid==6.10.0
-openai==1.3.7
+fastapi
+uvicorn[standard]
+python-dotenv
+
+# Database
+sqlalchemy
+aiosqlite
+asyncpg
+
+# Auth / Security
+passlib[bcrypt]
+PyJWT
+python-jose[cryptography]
+bcrypt
+
+# Validation / schemas
+pydantic
+email-validator
+
+# Rate limiting
+slowapi
+limits
+
+# Email service (you are using SendGrid)
+sendgrid
+
+# External APIs
+openai
+
+# Utilities
+python-multipart
+requests

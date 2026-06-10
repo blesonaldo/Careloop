@@ -536,6 +536,7 @@
     </div>
 
     <script>
+const API_URL = "https://careloop-production-0243.up.railway.app";
         // Country data
         const countries = [
             { name: 'United States', code: 'us', dial: '+1' },
@@ -731,7 +732,7 @@
                 console.log('Form data:', { fullName, businessName, email, phone_number: dialCode + phone });
                 
                 // Send data to backend API
-                const response = await fetch('/api/auth/signup', {
+                const response = await fetch(`${API_URL}/api/auth/signup`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

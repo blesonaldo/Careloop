@@ -28,6 +28,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 # Add validation error middleware
 @app.middleware("http")
@@ -36,9 +39,18 @@ async def catch_validation_errors(request: Request, call_next):
         response = await call_next(request)
         return response
     except ValidationError as e:
-        logging.error(f"Validation error for {request.url.path}: {e.errors()}")
-        return JSONResponse(status_code=422, content={"detail": e.errors()})
-
+        return JSONResponse(
+            status_code=422,
+            content={"detail": e.errors()}
+        )
+@app.get("/")
+async def root():
+    try:
+        with open("Frontend/careloop-landing.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return {"status": "ok", "message": "Careloop backend is live"}
+    
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -285,7 +297,6 @@ async def get_users():
             return {"users": [{"id": u.id, "email": u.email, "is_verified": u.is_email_verified} for u in users]}
     except Exception as e:
         return {"error": str(e)}
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
@@ -312,6 +323,10 @@ async def cleanup_unverified_users():
             print(f"Cleanup error: {e}")
         await asyncio.sleep(3600)
 
+<<<<<<< HEAD:main.py
 @app.on_event("startup")
 async def start_cleanup():
     asyncio.create_task(cleanup_unverified_users())
+=======
+
+>>>>>>> 616b90f61f0390b1ff54a6291ecdf1b4888da1d0:app/main.py
