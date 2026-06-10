@@ -1,0 +1,11 @@
+app/
+alembic/
+__pycache__/
+*.py
+*.txt
+*.ini
+*.db
+*.db-shm
+*.db-wal
+Procfile
+requirements.txt
