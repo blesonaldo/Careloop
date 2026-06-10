@@ -7,7 +7,7 @@ import logging
 from pydantic import ValidationError
 
 load_dotenv()
-from app.database import get_db
+from app.database import get_db, AsyncSessionLocal
 from app.models import Customer, User
 from app.routes import auth, user, customer, message, notification, sale
 from fastapi import APIRouter
@@ -55,6 +55,7 @@ async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+app.state.limiter = limiter
 add_rate_limit_exception_handler(app)
 
 @app.get("/api/auth/verify-email")
@@ -289,8 +290,28 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
 
+import asyncio
+from datetime import datetime, timedelta
+from sqlalchemy import delete
 
+async def cleanup_unverified_users():
+    while True:
+        try:
+            async with AsyncSessionLocal() as db:
+                cutoff = datetime.utcnow() - timedelta(hours=24)
+                await db.execute(
+                    delete(User).where(
+                        User.is_email_verified == False,
+                        User.hashed_password == None,
+                        User.created_at < cutoff
+                    )
+                )
+                await db.commit()
+                print(f"Cleanup: removed unverified accounts older than 24hrs")
+        except Exception as e:
+            print(f"Cleanup error: {e}")
+        await asyncio.sleep(3600)
 
-
-
-
+@app.on_event("startup")
+async def start_cleanup():
+    asyncio.create_task(cleanup_unverified_users())

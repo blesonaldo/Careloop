@@ -210,9 +210,7 @@ class AuthController:
         user.password_reset_expires_at = reset_expires
         await db.commit()
 
-        print(f"DEBUG forgot_password base_url: {base_url}")
-        reset_link = f"{base_url}/reset-password?token={reset_token}"
-        await email_service.send_password_reset_email(user.email, reset_token, reset_link)
+        await email_service.send_password_reset_email(user.email, reset_token, base_url)
 
         return ForgotPasswordResponse(
             message="If an account with this email exists, a password reset link has been sent."

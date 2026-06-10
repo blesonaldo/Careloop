@@ -1,103 +1,52 @@
-from typing import Optional
 import os
-from datetime import datetime
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email, To, Content
+from dotenv import load_dotenv
+import pathlib
+load_dotenv(dotenv_path=pathlib.Path(__file__).parent.parent.parent / ".env")
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class EmailService:
     def __init__(self):
-        # Debug: Print all environment variables that start with SENDGRID
-        print("Available SENDGRID environment variables:")
-        for key, value in os.environ.items():
-            if key.startswith("SENDGRID"):
-                print(f"  {key}: {'*' * (len(value) - 4) + value[-4:] if value else 'None'}")
-        
-        self.api_key = os.getenv("SENDGRID_API_KEY")
-        self.from_email = os.getenv("SENDGRID_FROM_EMAIL", "noreply@careloop.com")
+        self.gmail_user = os.getenv("GMAIL_USER")
+        self.gmail_password = os.getenv("GMAIL_APP_PASSWORD")
         self.from_name = os.getenv("SENDGRID_FROM_NAME", "Careloop")
-        
-        if not self.api_key:
-            logger.warning("SENDGRID_API_KEY not found in environment variables")
+        if not self.gmail_user or not self.gmail_password:
+            print("WARNING: Gmail credentials not found")
         else:
-            logger.info("SendGrid API key loaded successfully")
-    
+            print("Gmail SMTP loaded successfully")
+
+    def _send(self, to_email: str, subject: str, html: str) -> bool:
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = f"{self.from_name} <{self.gmail_user}>"
+            msg["To"] = to_email
+            msg.attach(MIMEText(html, "html"))
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(self.gmail_user, self.gmail_password)
+                server.sendmail(self.gmail_user, to_email, msg.as_string())
+            logger.info(f"Email sent to {to_email}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send email: {e}")
+            return False
+
     async def send_verification_email(self, email: str, token: str, base_url: str = "http://localhost:8001") -> bool:
-        """Send email verification email"""
-        try:
-            message = Mail(
-                from_email=Email(self.from_email, self.from_name),
-                to_emails=To(email),
-                subject="Verify your Careloop account",
-                html_content=self._get_verification_email_template(token, base_url)
-            )
-            
-            sg = SendGridAPIClient(self.api_key)
-            response = sg.send(message)
-            
-            if response.status_code == 202:
-                logger.info(f"Verification email sent to {email}")
-                return True
-            else:
-                logger.error(f"Failed to send verification email: {response.status_code} - {response.body}")
-                return False
-                
-        except Exception as e:
-            logger.error(f"Error sending verification email: {str(e)}")
-            return False
-    
+        html = self._get_verification_email_template(token, base_url)
+        return self._send(email, "Verify your Careloop account", html)
+
     async def send_password_reset_email(self, email: str, token: str, base_url: str = "http://localhost:8001") -> bool:
-        """Send password reset email"""
-        try:
-            message = Mail(
-                from_email=Email(self.from_email, self.from_name),
-                to_emails=To(email),
-                subject="Reset your Careloop password",
-                html_content=self._get_password_reset_email_template(token, base_url)
-            )
-            
-            sg = SendGridAPIClient(self.api_key)
-            response = sg.send(message)
-            
-            if response.status_code == 202:
-                logger.info(f"Password reset email sent to {email}")
-                return True
-            else:
-                logger.error(f"Failed to send password reset email: {response.status_code} - {response.body}")
-                return False
-                
-        except Exception as e:
-            logger.error(f"Error sending password reset email: {str(e)}")
-            return False
-    
+        html = self._get_password_reset_email_template(token, base_url)
+        return self._send(email, "Reset your Careloop password", html)
+
     async def send_welcome_email(self, email: str, name: str) -> bool:
-        """Send welcome email"""
-        try:
-            message = Mail(
-                from_email=Email(self.from_email, self.from_name),
-                to_emails=To(email),
-                subject="Welcome to Careloop!",
-                html_content=self._get_welcome_email_template(name)
-            )
-            
-            sg = SendGridAPIClient(self.api_key)
-            response = sg.send(message)
-            
-            if response.status_code == 202:
-                logger.info(f"Welcome email sent to {email}")
-                return True
-            else:
-                logger.error(f"Failed to send welcome email: {response.status_code} - {response.body}")
-                return False
-                
-        except Exception as e:
-            logger.error(f"Error sending welcome email: {str(e)}")
-            return False
-    
+        html = self._get_welcome_email_template(name)
+        return self._send(email, "Welcome to Careloop!", html)
+
     def _get_verification_email_template(self, token: str, base_url: str = "http://localhost:8001") -> str:
         """Get HTML template for verification email"""
         verification_url = f"{base_url}/verify-email?token={token}"

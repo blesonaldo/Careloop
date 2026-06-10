@@ -19,4 +19,6 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     last_login_at = Column(DateTime(timezone=True), nullable=True)
     avatar = Column(Text, nullable=True)
+    password_reset_token = Column(String, nullable=True)
+    password_reset_expires_at = Column(DateTime(timezone=True), nullable=True)
     preferred_currency = Column(String(10), default="USD", nullable=True)
