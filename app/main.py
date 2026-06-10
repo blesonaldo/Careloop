@@ -323,10 +323,7 @@ async def cleanup_unverified_users():
             print(f"Cleanup error: {e}")
         await asyncio.sleep(3600)
 
-<<<<<<< HEAD:main.py
 @app.on_event("startup")
 async def start_cleanup():
     asyncio.create_task(cleanup_unverified_users())
-=======
 
->>>>>>> 616b90f61f0390b1ff54a6291ecdf1b4888da1d0:app/main.py
