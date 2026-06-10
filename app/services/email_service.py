@@ -2,7 +2,8 @@ import os
 from dotenv import load_dotenv
 import pathlib
 import os as _os
-load_dotenv(dotenv_path=_os.path.join(_os.getcwd(), ".env"), override=True)
+if os.path.exists(".env"):
+    load_dotenv(dotenv_path=".env", override=True)
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
