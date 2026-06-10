@@ -45,10 +45,12 @@ async def catch_validation_errors(request: Request, call_next):
         )
 @app.get("/")
 async def root():
-    return {
-        "status": "ok",
-        "message": "Careloop backend is live "
-    }
+    try:
+        with open("Frontend/careloop-landing.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return {"status": "ok", "message": "Careloop backend is live"}
+    
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
