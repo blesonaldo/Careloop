@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, Request
 from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.rate_limit import RateLimitedRouter
+from app.rate_limit import RateLimitedRouter, limiter
 from app.database import get_db
 from app.controllers.auth_controller import AuthController
 from app.services.auth_service import TokenService
@@ -18,6 +18,7 @@ from app.dependencies import get_current_user_id
 router = RateLimitedRouter(prefix="/auth", tags=["authentication"], limit="20/minute")
 security = HTTPBearer()
 
+@limiter.limit("10/minute")
 @router.post("/signup", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED)
 async def signup(
     request: Request,
@@ -27,6 +28,7 @@ async def signup(
     base_url = str(request.base_url).rstrip("/")
     return await AuthController.create_user(db, user_data, base_url)
 
+@limiter.limit("10/minute")
 @router.post("/login", response_model=Token)
 async def login(
     request: Request,
@@ -54,6 +56,7 @@ async def verify_email(
             status_code=200
         )
 
+@limiter.limit("5/minute")
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
 async def forgot_password(
     request: Request,
@@ -63,6 +66,7 @@ async def forgot_password(
     base_url = str(request.base_url).rstrip("/")
     return await AuthController.forgot_password(db, body, base_url)
 
+@limiter.limit("5/minute")
 @router.post("/reset-password", response_model=ResetPasswordResponse)
 async def reset_password(
     request: Request,
