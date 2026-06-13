@@ -35,7 +35,12 @@ class EmailService:
                 server.login(self.gmail_user, self.gmail_password)
                 server.sendmail(self.gmail_user, to_email, msg.as_string())
             logger.info(f"Email sent to {to_email}")
+            print(f"SMTP: Email successfully delivered to {to_email}")
             return True
+        except smtplib.SMTPException as e:
+            print(f"SMTP ERROR: {e}")
+            logger.error(f"SMTP error: {e}")
+            return False
         except Exception as e:
             logger.error(f"Failed to send email: {e}")
             return False
