@@ -199,8 +199,9 @@ class AuthController:
     async def forgot_password(db: AsyncSession, request: ForgotPasswordRequest, base_url: str = "http://localhost:8001") -> ForgotPasswordResponse:
         user = await AuthController._get_user_by_email(db, request.email)
         if not user:
-            return ForgotPasswordResponse(
-                message="If an account with this email exists, a password reset link has been sent."
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Sorry, there is no user associated with this email address."
             )
 
         reset_token = TokenGeneratorService.generate_password_reset_token()

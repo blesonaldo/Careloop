@@ -30,6 +30,8 @@ class EmailService:
             msg["Subject"] = subject
             msg["From"] = f"{self.from_name} <{self.gmail_user}>"
             msg["To"] = to_email
+            plain = "Please view this email in an HTML-compatible email client."
+            msg.attach(MIMEText(plain, "plain"))
             msg.attach(MIMEText(html, "html"))
             with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
                 server.login(self.gmail_user, self.gmail_password)
@@ -116,34 +118,21 @@ class EmailService:
         """
     
     def _get_password_reset_email_template(self, token: str, base_url: str = "http://localhost:8001") -> str:
-        """Get HTML template for password reset email"""
         reset_url = f"{base_url}/reset-password?token={token}"
         return f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Reset Your Password</title>
-        </head>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: #f8f9fa; padding: 30px; border-radius: 10px;">
-                <h1 style="color: #3333FF; margin-bottom: 20px;">Reset Your Password</h1>
-                <p style="color: #666; line-height: 1.6;">We received a request to reset your password. Click the button below to create a new password.</p>
-                
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="{reset_url}" style="background: #3333FF; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
-                </div>
-                
-                <p style="color: #666; font-size: 14px;">If the button above doesn't work, you can copy and paste this link into your browser:</p>
-                <p style="color: #3333FF; word-break: break-all; font-size: 12px;">{reset_url}</p>
-                
-                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-                <p style="color: #999; font-size: 12px;">This link will expire in 1 hour. If you didn't request a password reset, please ignore this email.</p>
-            </div>
-        </body>
-        </html>
+        <html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+        <h2>Reset your Careloop password</h2>
+        <p>Hi there,</p>
+        <p>We received a request to reset your password. Click the link below to create a new one:</p>
+        <p><a href="{reset_url}" style="background:#3333FF;color:white;padding:12px 24px;text-decoration:none;border-radius:5px;display:inline-block;">Reset Password</a></p>
+        <p>Or copy and paste this link into your browser:</p>
+        <p>{reset_url}</p>
+        <p>This link expires in 1 hour.</p>
+        <p>If you didn't request a password reset, please ignore this email.</p>
+        <p>Thanks,<br>The Careloop Team</p>
+        </body></html>
         """
-    
+
     def _get_welcome_email_template(self, name: str) -> str:
         """Get HTML template for welcome email"""
         dashboard_url = "http://localhost:3001/Frontend/careloop-dashboard.html"
