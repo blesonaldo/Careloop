@@ -21,34 +21,35 @@ class EmailService:
             logger.info(f"Gmail SMTP loaded for {self.gmail_user}")
 
     def _send(self, to_email: str, subject: str, html: str) -> bool:
-        if not self.gmail_user or not self.gmail_password:
-            logger.error("Cannot send email: Gmail credentials not configured")
-            return False
-        try:
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = subject
-            msg["From"] = f"{self.from_name} <{self.gmail_user}>"
-            msg["To"] = to_email
-            msg.attach(MIMEText(html, "html"))
+    if not self.gmail_user or not self.gmail_password:
+        print("ERROR: Gmail credentials not configured")
+        return False
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = f"Careloop <{self.gmail_user}>"
+        msg["To"] = to_email
+        msg.attach(MIMEText(html, "html"))
 
-            with smtplib.SMTP("smtp.gmail.com", 587) as server:
-                server.ehlo()
-                server.starttls()
-                server.login(self.gmail_user, self.gmail_password)
-                server.sendmail(self.gmail_user, to_email, msg.as_string())
+        print(f"Attempting to send email to {to_email}...")
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(self.gmail_user, self.gmail_password)
+            server.sendmail(self.gmail_user, to_email, msg.as_string())
 
-            logger.info(f"Email sent to {to_email}")
-            return True
+        print(f"SUCCESS: Email sent to {to_email}")
+        return True
 
-        except smtplib.SMTPAuthenticationError:
-            logger.error("SMTP Auth failed — make sure GMAIL_APP_PASSWORD is a Gmail App Password, not your real password")
-            return False
-        except smtplib.SMTPException as e:
-            logger.error(f"SMTP error: {e}")
-            return False
-        except Exception as e:
-            logger.error(f"Unexpected error sending email: {e}")
-            return False
+    except smtplib.SMTPAuthenticationError as e:
+        print(f"SMTP AUTH FAILED: {e}")
+        return False
+    except smtplib.SMTPException as e:
+        print(f"SMTP ERROR: {e}")
+        return False
+    except Exception as e:
+        print(f"EMAIL ERROR: {e}")
+        return False
 
     async def send_verification_email(self, email: str, token: str, base_url: str = "http://localhost:8001") -> bool:
         html = self._get_verification_email_template(token, base_url)
