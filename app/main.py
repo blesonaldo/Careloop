@@ -333,3 +333,11 @@ async def cleanup_unverified_users():
 async def start_cleanup():
     asyncio.create_task(cleanup_unverified_users())
 
+@app.get("/debug-env")
+async def debug_env():
+    import os
+    return {
+        "gmail_user": os.getenv("GMAIL_USER"),
+        "gmail_password_set": bool(os.getenv("GMAIL_APP_PASSWORD")),
+        "mail_from_name": os.getenv("MAIL_FROM_NAME")
+    }

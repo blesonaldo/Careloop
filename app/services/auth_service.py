@@ -58,10 +58,13 @@ class TokenService:
 class PasswordService:
     @staticmethod
     def hash_password(password: str) -> str:
+        # bcrypt max is 72 bytes — truncate to be safe
+        password = password[:72]
         return pwd_context.hash(password)
 
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
+        plain_password = plain_password[:72]
         return pwd_context.verify(plain_password, hashed_password)
 
     @staticmethod
