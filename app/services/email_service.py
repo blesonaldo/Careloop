@@ -14,32 +14,38 @@ class EmailService:
         self.gmail_user = os.getenv("GMAIL_USER")
         self.gmail_password = os.getenv("GMAIL_APP_PASSWORD")
         self.from_name = os.getenv("MAIL_FROM_NAME", "Careloop")
-
         if not self.gmail_user or not self.gmail_password:
             logger.warning("WARNING: GMAIL_USER or GMAIL_APP_PASSWORD not set in .env")
         else:
             logger.info(f"Gmail SMTP loaded for {self.gmail_user}")
 
     def _send(self, to_email: str, subject: str, html: str) -> bool:
-    if not self.gmail_user or not self.gmail_password:
-        print("ERROR: Gmail credentials not configured")
-        return False
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = f"Careloop <{self.gmail_user}>"
-        msg["To"] = to_email
-        msg.attach(MIMEText(html, "html"))
-
-        print(f"Attempting to send email to {to_email}...")
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(self.gmail_user, self.gmail_password)
-            server.sendmail(self.gmail_user, to_email, msg.as_string())
-
-        print(f"SUCCESS: Email sent to {to_email}")
-        return True
+        if not self.gmail_user or not self.gmail_password:
+            print("ERROR: Gmail credentials not configured")
+            return False
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = f"Careloop <{self.gmail_user}>"
+            msg["To"] = to_email
+            msg.attach(MIMEText(html, "html"))
+            print(f"Attempting to send email to {to_email}...")
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                server.ehlo()
+                server.starttls()
+                server.login(self.gmail_user, self.gmail_password)
+                server.sendmail(self.gmail_user, to_email, msg.as_string())
+            print(f"SUCCESS: Email sent to {to_email}")
+            return True
+        except smtplib.SMTPAuthenticationError as e:
+            print(f"SMTP AUTH FAILED: {e}")
+            return False
+        except smtplib.SMTPException as e:
+            print(f"SMTP ERROR: {e}")
+            return False
+        except Exception as e:
+            print(f"EMAIL ERROR: {e}")
+            return False
 
     except smtplib.SMTPAuthenticationError as e:
         print(f"SMTP AUTH FAILED: {e}")
