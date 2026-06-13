@@ -42,6 +42,7 @@ class EmailService:
             logger.error(f"SMTP error: {e}")
             return False
         except Exception as e:
+            print(f"GENERAL ERROR: {type(e).__name__}: {e}")
             logger.error(f"Failed to send email: {e}")
             return False
 
