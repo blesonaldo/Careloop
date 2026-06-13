@@ -47,16 +47,6 @@ class EmailService:
             print(f"EMAIL ERROR: {e}")
             return False
 
-    except smtplib.SMTPAuthenticationError as e:
-        print(f"SMTP AUTH FAILED: {e}")
-        return False
-    except smtplib.SMTPException as e:
-        print(f"SMTP ERROR: {e}")
-        return False
-    except Exception as e:
-        print(f"EMAIL ERROR: {e}")
-        return False
-
     async def send_verification_email(self, email: str, token: str, base_url: str = "http://localhost:8001") -> bool:
         html = self._get_verification_email_template(token, base_url)
         return self._send(email, "Verify your Careloop account", html)
