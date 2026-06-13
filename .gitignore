@@ -31,3 +31,6 @@ Thumbs.db
 node_modules/
 
 .env
+careloop.db
+careloop.db-wal
+careloop.db-shm
