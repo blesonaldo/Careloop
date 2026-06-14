@@ -341,3 +341,10 @@ async def debug_env():
         "gmail_password_set": bool(os.getenv("GMAIL_APP_PASSWORD")),
         "mail_from_name": os.getenv("MAIL_FROM_NAME")
     }
+@app.delete("/admin/clear-unverified")
+async def clear_unverified(db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import delete
+    from app.models.user import User
+    await db.execute(delete(User).where(User.is_email_verified == False))
+    await db.commit()
+    return {"message": "Cleared all unverified users"}
