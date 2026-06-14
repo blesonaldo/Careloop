@@ -50,7 +50,7 @@ class EmailService:
 
     async def send_verification_email(self, email: str, token: str, base_url: str = "http://localhost:8001") -> bool:
         html = self._get_verification_email_template(token, base_url)
-        return self._send(email, "Verify your Careloop account", html)
+        return self._send(email, "Your Careloop verification link", html)
 
     async def send_password_reset_email(self, email: str, token: str, base_url: str = "http://localhost:8001") -> bool:
         html = self._get_password_reset_email_template(token, base_url)
@@ -60,63 +60,23 @@ class EmailService:
         html = self._get_welcome_email_template(name)
         return self._send(email, "Welcome to Careloop!", html)
 
-    def _get_verification_email_template(self, token: str, base_url: str = "http://localhost:8001") -> str:
-        """Get HTML template for verification email"""
+    def _get_verification_email_template(self, token: str, base_url: str = "http://localhost:8001", name: str = "") -> str:
         verification_url = f"{base_url}/verify-email?token={token}"
+        greeting = f"Hi {name}," if name else "Hi there,"
         return f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Verify Your Careloop Account</title>
-        </head>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
-            <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; border: 1px solid #e9ecef;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="color: #2c3e50; margin-bottom: 10px; font-size: 24px;">Careloop CRM</h1>
-                    <p style="color: #6c757d; margin: 0; font-size: 16px;">Customer Relationship Management</p>
-                </div>
-                
-                <h2 style="color: #2c3e50; margin-bottom: 20px; font-size: 20px;">Verify Your Email Address</h2>
-                
-                <p style="color: #495057; line-height: 1.6; margin-bottom: 25px;">
-                    Thank you for registering with Careloop! To complete your registration and activate your account, please verify your email address by clicking the button below.
-                </p>
-                
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="{verification_url}" style="background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 16px;">Verify Email Address</a>
-                </div>
-                
-                <div style="background: #e9ecef; padding: 15px; border-radius: 6px; margin: 25px 0;">
-                    <p style="color: #495057; font-size: 14px; margin: 0 0 10px 0;">
-                        <strong>Alternative:</strong> If the button above doesn't work, you can copy and paste this link into your browser:
-                    </p>
-                    <p style="color: #007bff; word-break: break-all; font-size: 12px; margin: 0;">{verification_url}</p>
-                </div>
-                
-                <div style="border-top: 1px solid #dee2e6; margin-top: 30px; padding-top: 20px;">
-                    <p style="color: #6c757d; font-size: 12px; margin: 0 0 10px 0;">
-                        <strong>Important:</strong> This verification link will expire in 24 hours for security reasons.
-                    </p>
-                    <p style="color: #6c757d; font-size: 12px; margin: 0;">
-                        If you didn't create an account with Careloop, please ignore this email or contact our support team.
-                    </p>
-                </div>
-                
-                <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #dee2e6;">
-                    <p style="color: #6c757d; font-size: 12px; margin: 0;">
-                        © 2026 Careloop CRM. All rights reserved.
-                    </p>
-                    <p style="color: #6c757d; font-size: 12px; margin: 5px 0 0 0;">
-                        This is an automated message. Please do not reply to this email.
-                    </p>
-                </div>
-            </div>
-        </body>
-        </html>
+        <html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px 24px;color:#333;line-height:1.6;">
+        <p style="font-size:16px;">{greeting}</p>
+        <p style="font-size:15px;">Thanks for creating a Careloop account. Please verify your email address by clicking the button below.</p>
+        <p style="text-align:center;margin:32px 0;">
+            <a href="{verification_url}" style="background:#3333FF;color:white;padding:14px 32px;text-decoration:none;border-radius:6px;font-size:15px;font-weight:600;display:inline-block;">Verify Email Address</a>
+        </p>
+        <p style="font-size:14px;color:#666;">Or copy and paste this link into your browser:</p>
+        <p style="font-size:13px;color:#3333FF;word-break:break-all;">{verification_url}</p>
+        <p style="font-size:13px;color:#999;margin-top:32px;">This link expires in 24 hours. If you didn't create a Careloop account, you can safely ignore this email.</p>
+        <p style="font-size:14px;margin-top:24px;">Thanks,<br><strong>The Careloop Team</strong></p>
+        </body></html>
         """
-    
+
     def _get_password_reset_email_template(self, token: str, base_url: str = "http://localhost:8001") -> str:
         reset_url = f"{base_url}/reset-password?token={token}"
         return f"""

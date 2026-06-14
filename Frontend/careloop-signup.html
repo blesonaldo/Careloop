@@ -776,7 +776,7 @@ const API_URL = window.location.origin;
                     console.log('Signup successful:', data);
                 } else {
                     // Handle backend errors
-                    throw new Error(data.message || 'Registration failed');
+                    throw new Error(data.detail || data.message || 'Registration failed');
                 }
             } catch (error) {
                 console.error('Signup error:', error);
