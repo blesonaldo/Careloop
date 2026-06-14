@@ -33,6 +33,11 @@ class AuthController:
         try:
             existing_user = await AuthController._get_user_by_email(db, user_data.email)
             if existing_user:
+                if not existing_user.is_email_verified:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="This email was never verified. Please sign up with a fresh email address."
+                    )
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Email already registered"
@@ -202,6 +207,11 @@ class AuthController:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Sorry, there is no user associated with this email address."
+            )
+        if not user.is_email_verified:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This email was never verified. Please sign up with a fresh email address."
             )
 
         reset_token = TokenGeneratorService.generate_password_reset_token()

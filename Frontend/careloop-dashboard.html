@@ -1935,6 +1935,7 @@ async function goStep3(){
   const sub=addFlowData.purchased?"We'll suggest a check-in in 14 days.":"We'll remind you to follow up in a few days.";
   document.getElementById('success-sub').textContent=sub;
   buildFollowups();
+  resetAddFlow();
   openModal('success-modal');
 }
 
