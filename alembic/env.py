@@ -23,12 +23,13 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
-def get_url() -> str:
-    """Point alembic at the same database as the app, using a sync driver."""
-    url = os.getenv("DATABASE_URL", "sqlite:///careloop.db")
-    if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
-    return url.replace("+asyncpg", "").replace("+aiosqlite", "")
+def get_sync_url() -> str:
+    url = os.environ["DATABASE_URL"]  # or however your env.py reads it
+    # Force the psycopg2 driver for Alembic's sync engine
+    for prefix in ("postgres://", "postgresql://", "postgresql+psycopg://", "postgresql+asyncpg://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg2://" + url[len(prefix):]
+    return url
 
 
 def run_migrations_offline() -> None:
@@ -45,17 +46,15 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
-    section = config.get_section(config.config_ini_section, {})
-    # Escaped because ConfigParser treats a bare % as interpolation syntax.
-    section["sqlalchemy.url"] = get_url().replace("%", "%%")
-
+def run_migrations_online():
+    configuration = config.get_section(config.config_ini_section) or {}
+    configuration["sqlalchemy.url"] = get_sync_url()
     connectable = engine_from_config(
-        section,
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+    ...
 
     try:
         with connectable.connect() as connection:
